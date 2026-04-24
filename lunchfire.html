@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="ja">
@@ -9,24 +10,24 @@
   @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
 
 :root {
-–fire: #ff4500;
-–fire2: #ff8c00;
-–yellow: #ffd700;
-–bg: #1a0a00;
-–panel: #2d1200;
-–panel2: #3d1a00;
-–text: #fff8f0;
-–safe: #4caf50;
-–danger: #ff1744;
-–gauge-w: 260px;
+--fire: #ff4500;
+--fire2: #ff8c00;
+--yellow: #ffd700;
+--bg: #1a0a00;
+--panel: #2d1200;
+--panel2: #3d1a00;
+--text: #fff8f0;
+--safe: #4caf50;
+--danger: #ff1744;
+--gauge-w: 260px;
 }
 
-- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
-background: var(–bg);
+background: var(--bg);
 font-family: ‘M PLUS Rounded 1c’, sans-serif;
-color: var(–text);
+color: var(--text);
 min-height: 100dvh;
 display: flex;
 flex-direction: column;
@@ -134,13 +135,13 @@ z-index: 20;
 position: relative;
 }
 .score-box {
-background: var(–panel2);
+background: var(--panel2);
 border: 1px solid #ff450055;
 border-radius: 12px;
 padding: 6px 14px;
 font-family: ‘Zen Maru Gothic’, sans-serif;
 font-size: 0.85rem;
-color: var(–yellow);
+color: var(--yellow);
 }
 .score-num { font-size: 1.3rem; font-weight: 900; }
 .level-box {
@@ -149,7 +150,7 @@ font-size: 0.8rem;
 color: #ffb070;
 text-align: center;
 }
-.level-num { font-size: 1.4rem; font-weight: 900; color: var(–fire2); }
+.level-num { font-size: 1.4rem; font-weight: 900; color: var(--fire2); }
 
 /* Gauge section */
 .gauge-section {
@@ -256,7 +257,7 @@ transition: transform 0.2s;
 font-family: ‘Zen Maru Gothic’, sans-serif;
 font-size: 1.5rem;
 font-weight: 900;
-color: var(–yellow);
+color: var(--yellow);
 }
 .stomach-message {
 font-size: 0.78rem;
@@ -367,9 +368,9 @@ font-size: 2.2rem;
 font-weight: 900;
 text-align: center;
 }
-.result-title.great { color: var(–yellow); text-shadow: 0 0 30px rgba(255,215,0,0.6); }
+.result-title.great { color: var(--yellow); text-shadow: 0 0 30px rgba(255,215,0,0.6); }
 .result-title.good { color: #4caf50; }
-.result-title.over { color: var(–danger); animation: shake-title 0.5s ease; }
+.result-title.over { color: var(--danger); animation: shake-title 0.5s ease; }
 @keyframes shake-title {
 0%,100% { transform: translateX(0); }
 20% { transform: translateX(-12px); }
@@ -379,7 +380,7 @@ text-align: center;
 }
 .result-emoji { font-size: 5rem; margin: 16px 0; }
 .result-stats {
-background: var(–panel);
+background: var(--panel);
 border: 1px solid #ff450033;
 border-radius: 16px;
 padding: 20px 32px;
@@ -387,7 +388,7 @@ text-align: center;
 margin: 12px 0;
 }
 .stat-row { margin: 8px 0; font-size: 0.95rem; color: #ffb080; }
-.stat-val { font-size: 1.5rem; font-weight: 700; color: var(–yellow); }
+.stat-val { font-size: 1.5rem; font-weight: 700; color: var(--yellow); }
 .result-msg { font-size: 0.9rem; color: #ff9060; text-align: center; margin: 10px 0; }
 
 /* Combo display */
@@ -399,7 +400,7 @@ transform: translateX(-50%);
 font-family: ‘Zen Maru Gothic’, sans-serif;
 font-size: 1.8rem;
 font-weight: 900;
-color: var(–yellow);
+color: var(--yellow);
 text-shadow: 0 0 20px rgba(255,215,0,0.8);
 pointer-events: none;
 z-index: 30;
@@ -424,7 +425,7 @@ overflow: hidden;
 }
 .timer-bar-fill {
 height: 100%;
-background: linear-gradient(90deg, var(–fire2), var(–yellow));
+background: linear-gradient(90deg, var(--fire2), var(--yellow));
 border-radius: 3px;
 transition: width 0.1s linear, background 0.3s;
 }

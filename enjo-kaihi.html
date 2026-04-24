@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="ja">
@@ -9,24 +10,24 @@
   @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
 
 :root {
-–fire1: #ff2200;
-–fire2: #ff6600;
-–fire3: #ffaa00;
-–fire4: #ffdd00;
-–safe: #00e5a0;
-–bg: #0a0a0f;
-–card: #14141e;
-–card2: #1e1e2e;
-–text: #f0eaff;
-–muted: #888;
+--fire1: #ff2200;
+--fire2: #ff6600;
+--fire3: #ffaa00;
+--fire4: #ffdd00;
+--safe: #00e5a0;
+--bg: #0a0a0f;
+--card: #14141e;
+--card2: #1e1e2e;
+--text: #f0eaff;
+--muted: #888;
 }
 
-- { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
 font-family: ‘Zen Maru Gothic’, sans-serif;
-background: var(–bg);
-color: var(–text);
+background: var(--bg);
+color: var(--text);
 min-height: 100vh;
 display: flex;
 flex-direction: column;
@@ -81,7 +82,7 @@ margin-bottom: 20px;
 .logo {
 font-size: 2.2rem;
 font-weight: 900;
-background: linear-gradient(135deg, var(–fire2), var(–fire3), var(–fire4));
+background: linear-gradient(135deg, var(--fire2), var(--fire3), var(--fire4));
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
 background-clip: text;
@@ -93,14 +94,14 @@ filter: drop-shadow(0 0 20px rgba(255,100,0,0.5));
 
 .subtitle {
 font-size: 0.8rem;
-color: var(–muted);
+color: var(--muted);
 margin-top: 4px;
 letter-spacing: 2px;
 }
 
 /* 炎ゲージ */
 .gauge-wrapper {
-background: var(–card);
+background: var(--card);
 border-radius: 16px;
 padding: 16px 20px;
 margin-bottom: 16px;
@@ -126,7 +127,7 @@ gap: 6px;
 .gauge-pct {
 font-size: 1.4rem;
 font-weight: 900;
-color: var(–fire2);
+color: var(--fire2);
 transition: color 0.3s;
 }
 
@@ -177,7 +178,7 @@ margin-bottom: 16px;
 
 .stat-box {
 flex: 1;
-background: var(–card);
+background: var(--card);
 border-radius: 12px;
 padding: 12px;
 text-align: center;
@@ -186,7 +187,7 @@ border: 1px solid #2a2a3a;
 
 .stat-label {
 font-size: 0.7rem;
-color: var(–muted);
+color: var(--muted);
 letter-spacing: 1px;
 margin-bottom: 4px;
 }
@@ -198,7 +199,7 @@ font-weight: 900;
 
 /* シナリオカード */
 .scenario-card {
-background: var(–card2);
+background: var(--card2);
 border-radius: 20px;
 padding: 24px;
 margin-bottom: 16px;
@@ -213,7 +214,7 @@ content: ‘’;
 position: absolute;
 top: 0; left: 0; right: 0;
 height: 3px;
-background: linear-gradient(90deg, var(–fire1), var(–fire3), var(–fire4));
+background: linear-gradient(90deg, var(--fire1), var(--fire3), var(--fire4));
 }
 
 .scenario-icon {
@@ -231,7 +232,7 @@ animation: bounce 2s ease-in-out infinite;
 
 .scenario-situation {
 font-size: 0.7rem;
-color: var(–fire3);
+color: var(--fire3);
 letter-spacing: 2px;
 font-weight: 700;
 margin-bottom: 8px;
@@ -240,7 +241,7 @@ margin-bottom: 8px;
 .scenario-text {
 font-size: 1rem;
 line-height: 1.7;
-color: var(–text);
+color: var(--text);
 font-weight: 700;
 }
 
@@ -253,11 +254,11 @@ margin-bottom: 16px;
 }
 
 .choice-btn {
-background: var(–card);
+background: var(--card);
 border: 2px solid #2a2a3a;
 border-radius: 14px;
 padding: 16px 20px;
-color: var(–text);
+color: var(--text);
 font-family: inherit;
 font-size: 0.95rem;
 font-weight: 700;
@@ -282,7 +283,7 @@ transition: opacity 0.2s;
 }
 
 .choice-btn:hover:not(:disabled) {
-border-color: var(–fire3);
+border-color: var(--fire3);
 transform: translateY(-2px);
 box-shadow: 0 8px 24px rgba(255,150,0,0.2);
 }
@@ -306,13 +307,13 @@ font-weight: 900;
 }
 
 .choice-btn.correct {
-border-color: var(–safe);
+border-color: var(--safe);
 background: rgba(0, 229, 160, 0.1);
 animation: correctPulse 0.5s ease;
 }
 
 .choice-btn.wrong {
-border-color: var(–fire1);
+border-color: var(--fire1);
 background: rgba(255, 34, 0, 0.1);
 animation: wrongShake 0.5s ease;
 }
@@ -347,13 +348,13 @@ animation: fadeSlideIn 0.3s ease;
 
 .feedback.correct {
 background: rgba(0,229,160,0.1);
-border: 1px solid var(–safe);
+border: 1px solid var(--safe);
 color: #7fffcf;
 }
 
 .feedback.wrong {
 background: rgba(255,60,0,0.1);
-border: 1px solid var(–fire1);
+border: 1px solid var(--fire1);
 color: #ffaa77;
 }
 
@@ -369,7 +370,7 @@ padding: 16px;
 background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
 border: 2px solid #4a4a5a;
 border-radius: 14px;
-color: var(–text);
+color: var(--text);
 font-family: inherit;
 font-size: 1rem;
 font-weight: 900;
@@ -404,7 +405,7 @@ to { opacity: 1; }
 }
 
 .overlay-card {
-background: var(–card2);
+background: var(--card2);
 border-radius: 24px;
 padding: 36px 28px;
 text-align: center;
@@ -414,8 +415,8 @@ border: 2px solid;
 box-shadow: 0 24px 64px rgba(0,0,0,0.8);
 }
 
-.overlay-card.fail { border-color: var(–fire1); box-shadow: 0 0 60px rgba(255,30,0,0.3); }
-.overlay-card.clear { border-color: var(–safe); box-shadow: 0 0 60px rgba(0,229,160,0.3); }
+.overlay-card.fail { border-color: var(--fire1); box-shadow: 0 0 60px rgba(255,30,0,0.3); }
+.overlay-card.clear { border-color: var(--safe); box-shadow: 0 0 60px rgba(0,229,160,0.3); }
 
 .overlay-emoji { font-size: 4rem; margin-bottom: 16px; animation: bigBounce 1s ease infinite; }
 
@@ -430,16 +431,16 @@ font-weight: 900;
 margin-bottom: 8px;
 }
 
-.overlay-title.fail { color: var(–fire1); text-shadow: 0 0 20px rgba(255,30,0,0.5); }
-.overlay-title.clear { color: var(–safe); text-shadow: 0 0 20px rgba(0,229,160,0.5); }
+.overlay-title.fail { color: var(--fire1); text-shadow: 0 0 20px rgba(255,30,0,0.5); }
+.overlay-title.clear { color: var(--safe); text-shadow: 0 0 20px rgba(0,229,160,0.5); }
 
-.overlay-msg { font-size: 0.95rem; color: var(–muted); margin-bottom: 8px; line-height: 1.7; }
+.overlay-msg { font-size: 0.95rem; color: var(--muted); margin-bottom: 8px; line-height: 1.7; }
 .overlay-score { font-size: 2.5rem; font-weight: 900; margin: 16px 0; }
 
 .restart-btn {
 width: 100%;
 padding: 16px;
-background: linear-gradient(135deg, var(–fire2), var(–fire1));
+background: linear-gradient(135deg, var(--fire2), var(--fire1));
 border: none;
 border-radius: 14px;
 color: white;
@@ -475,7 +476,7 @@ to { transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 24px red); }
 #startScreen h1 {
 font-size: 2rem;
 font-weight: 900;
-background: linear-gradient(135deg, var(–fire2), var(–fire4));
+background: linear-gradient(135deg, var(--fire2), var(--fire4));
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
 background-clip: text;
@@ -483,7 +484,7 @@ margin-bottom: 12px;
 }
 
 #startScreen p {
-color: var(–muted);
+color: var(--muted);
 font-size: 0.9rem;
 line-height: 1.8;
 margin-bottom: 24px;
@@ -491,7 +492,7 @@ margin-bottom: 24px;
 
 .start-btn {
 padding: 18px 40px;
-background: linear-gradient(135deg, var(–fire1), var(–fire3));
+background: linear-gradient(135deg, var(--fire1), var(--fire3));
 border: none;
 border-radius: 50px;
 color: white;
@@ -536,9 +537,9 @@ transition: all 0.3s;
 border: 1px solid #3a3a4a;
 }
 
-.dot.done { background: var(–safe); border-color: var(–safe); }
-.dot.wrong { background: var(–fire1); border-color: var(–fire1); }
-.dot.current { background: var(–fire3); border-color: var(–fire3); width: 16px; border-radius: 4px; }
+.dot.done { background: var(--safe); border-color: var(--safe); }
+.dot.wrong { background: var(--fire1); border-color: var(--fire1); }
+.dot.current { background: var(--fire3); border-color: var(--fire3); width: 16px; border-radius: 4px; }
 </style>
 
 </head>
@@ -864,9 +865,7 @@ let currentQ = 0;
 let fireGauge = 0;
 let score = 0;
 let answered = false;
-let results = []; // 'correct' or 'wrong' per question
-
-const FIRE_PER_WRONG = 35;
+let results = []; // 'correct' or 'wrong' per question * const FIRE_PER_WRONG = 35;
 const SCORE_PER_CORRECT = 150;
 const BONUS_NO_FIRE = 300;
 
