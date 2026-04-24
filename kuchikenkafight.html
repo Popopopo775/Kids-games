@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>口喧嘩ファイト</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Antique+Soft&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e02020;--dark-red:#8b0000;--yellow:#ffd700;--bg:#0a0a0f;--panel:#12121a;--border:#2a2a3a;--text:#f0e8d0;--logic:#4488ff;--attack:#ff4444;--calm:#44cc88}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'M PLUS Rounded 1c',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;position:relative}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(139,0,0,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(68,136,255,.08) 0%,transparent 60%);pointer-events:none;z-index:0}
+  .scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);pointer-events:none;z-index:1}
+  .game-wrap{position:relative;z-index:2;width:100%;max-width:480px;padding:0 12px 40px}
+  .title{font-family:'Zen Antique Soft',serif;font-size:2rem;text-align:center;padding:20px 0 6px;color:var(--yellow);text-shadow:0 0 20px rgba(255,215,0,.5),0 2px 0 #8b6800;letter-spacing:.1em}
+  .title span{color:var(--red);text-shadow:0 0 20px rgba(220,0,0,.6)}
+  .sound-btn{display:block;margin:0 auto 8px;background:none;border:1px solid #333;border-radius:20px;padding:3px 14px;color:#666;font-size:.7rem;cursor:pointer;letter-spacing:.1em;transition:all .15s}
+  .sound-btn.on{border-color:var(--calm);color:var(--calm)}
+  .turn-badge{text-align:center;font-size:.75rem;color:#666;margin-bottom:12px;letter-spacing:.2em}
+  .arena{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
+  .arena::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+  .characters{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;min-height:130px}
+  .char-block{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+  .char-block.player{align-items:flex-start}.char-block.enemy{align-items:flex-end}
+  .char-name{font-size:.65rem;letter-spacing:.15em;color:#888}
+  .hp-bar-wrap{width:120px;height:10px;background:#1e1e2e;border-radius:5px;overflow:hidden;border:1px solid #333}
+  .hp-bar{height:100%;border-radius:5px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .char-block.player .hp-bar{background:linear-gradient(90deg,#22cc66,#44ff88)}
+  .char-block.enemy .hp-bar{background:linear-gradient(90deg,#ff3333,#ff6644)}
+  .hp-text{font-size:.7rem;color:#aaa}
+  .char-icon{font-size:3.5rem;line-height:1;transition:transform .1s;position:relative}
+  .char-icon.shake{animation:shake .3s ease}
+  .char-icon.attack-anim{animation:charAttack .3s ease}
+  .char-block.enemy .char-icon.attack-anim{animation:enemyAttack .3s ease}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px) rotate(-5deg)}75%{transform:translateX(8px) rotate(5deg)}}
+  @keyframes charAttack{0%{transform:translateX(0) scale(1)}30%{transform:translateX(20px) scale(1.1)}100%{transform:translateX(0) scale(1)}}
+  @keyframes enemyAttack{0%{transform:translateX(0) scale(1)}30%{transform:translateX(-20px) scale(1.1)}100%{transform:translateX(0) scale(1)}}
+  .vs-text{font-family:'Zen Antique Soft',serif;font-size:1.6rem;color:var(--red);text-shadow:0 0 12px rgba(220,0,0,.7);align-self:center;padding:0 8px}
+  .speech-area{background:#0d0d18;border:1px solid #2a2a44;border-radius:10px;padding:12px 14px;min-height:54px;font-size:.95rem;line-height:1.6;position:relative}
+  .speech-area .speaker-label{font-size:.6rem;letter-spacing:.2em;color:var(--red);margin-bottom:4px;font-weight:700}
+  .choices-area{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .choice-btn{background:#0d0d18;border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'M PLUS Rounded 1c',sans-serif;font-size:.9rem;text-align:left;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;position:relative;overflow:hidden}
+  .choice-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .15s}
+  .choice-btn[data-type="logic"]{border-color:rgba(68,136,255,.3)}.choice-btn[data-type="logic"]::before{background:linear-gradient(135deg,rgba(68,136,255,.1),transparent)}.choice-btn[data-type="logic"]:hover{border-color:var(--logic);box-shadow:0 0 12px rgba(68,136,255,.3)}.choice-btn[data-type="logic"]:hover::before{opacity:1}
+  .choice-btn[data-type="attack"]{border-color:rgba(255,68,68,.3)}.choice-btn[data-type="attack"]::before{background:linear-gradient(135deg,rgba(255,68,68,.1),transparent)}.choice-btn[data-type="attack"]:hover{border-color:var(--attack);box-shadow:0 0 12px rgba(255,68,68,.3)}.choice-btn[data-type="attack"]:hover::before{opacity:1}
+  .choice-btn[data-type="calm"]{border-color:rgba(68,204,136,.3)}.choice-btn[data-type="calm"]::before{background:linear-gradient(135deg,rgba(68,204,136,.1),transparent)}.choice-btn[data-type="calm"]:hover{border-color:var(--calm);box-shadow:0 0 12px rgba(68,204,136,.3)}.choice-btn[data-type="calm"]:hover::before{opacity:1}
+  .choice-btn:disabled{opacity:.4;cursor:not-allowed}
+  .type-badge{font-size:.65rem;padding:2px 6px;border-radius:4px;font-weight:700;white-space:nowrap}
+  .type-badge.logic{background:rgba(68,136,255,.2);color:var(--logic)}.type-badge.attack{background:rgba(255,68,68,.2);color:var(--attack)}.type-badge.calm{background:rgba(68,204,136,.2);color:var(--calm)}
+  .result-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 16px;text-align:center;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:all .2s}
+  .flash{position:fixed;inset:0;pointer-events:none;z-index:100;animation:flashAnim .35s ease forwards}
+  @keyframes flashAnim{0%{opacity:.6}100%{opacity:0}}
+  .flash.red{background:rgba(220,0,0,.25)}.flash.blue{background:rgba(68,136,255,.2)}.flash.green{background:rgba(68,204,136,.2)}
+  .dmg-float{position:fixed;font-family:'Zen Antique Soft',serif;font-size:2rem;font-weight:900;pointer-events:none;z-index:200;animation:floatUp 1s ease forwards}
+  @keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-60px) scale(.7);opacity:0}}
+  .game-end{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;background:rgba(0,0,0,.88);animation:fadeIn .5s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .game-end-text{font-family:'Zen Antique Soft',serif;font-size:3rem;margin-bottom:12px;text-shadow:0 0 30px currentColor;animation:textPulse 1s ease infinite alternate}
+  @keyframes textPulse{from{transform:scale(1)}to{transform:scale(1.05)}}
+  .game-end-sub{font-size:1rem;color:#888;margin-bottom:30px}
+  .retry-btn{background:var(--red);border:none;border-radius:12px;padding:14px 40px;color:white;font-family:'M PLUS Rounded 1c',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.1em}
+  .retry-btn:hover{background:#ff3333;transform:scale(1.05);box-shadow:0 0 20px rgba(220,0,0,.5)}
+  .guide{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.7rem;color:#666;line-height:1.8;margin-top:12px}
+  .guide strong{color:#888}
+  .combo-flash{animation:comboAnim .4s ease}
+  @keyframes comboAnim{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  .cursor{display:inline-block;width:2px;height:1em;background:currentColor;animation:blink .8s infinite;vertical-align:middle;margin-left:1px}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="game-wrap">
+  <div class="title">🔥 口<span>喧嘩</span>ファイト</div>
+  <button class="sound-btn on" id="soundBtn" onclick="toggleSound()">🔊 効果音 ON</button>
+  <div class="turn-badge" id="turnBadge">ROUND 1</div>
+  <div class="arena">
+    <div class="characters">
+      <div class="char-block player">
+        <div class="char-name">▸ あなた</div>
+        <div class="hp-bar-wrap"><div class="hp-bar" id="playerHPBar" style="width:100%"></div></div>
+        <div class="hp-text">HP <span id="playerHP">10</span>/10</div>
+        <div class="char-icon" id="playerIcon">😤</div>
+      </div>
+      <div class="vs-text">VS</div>
+      <div class="char-block enemy">
+        <div class="char-name">相手 ◂</div>
+        <div class="hp-bar-wrap"><div class="hp-bar" id="enemyHPBar" style="width:100%"></div></div>
+        <div class="hp-text">HP <span id="enemyHP">10</span>/10</div>
+        <div class="char-icon" id="enemyIcon">😠</div>
+      </div>
+    </div>
+    <div class="speech-area">
+      <div class="speaker-label" id="speakerLabel">😠 相手の挑発</div>
+      <div id="speechText">…</div>
+    </div>
+  </div>
+  <div class="choices-area" id="choices"></div>
+  <div class="result-panel" id="resultPanel">選択肢を選んでください</div>
+  <div class="guide"><strong>タイプ相性：</strong>🔵論理 ＞ 🔴攻撃 &nbsp;|&nbsp; 🔴攻撃 ＞ 🟢冷静 &nbsp;|&nbsp; 🟢冷静 ＞ 🔵論理</div>
+</div>
+<script>
+let audioCtx=null,soundOn=true;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function toggleSound(){soundOn=!soundOn;const b=document.getElementById("soundBtn");b.textContent=soundOn?"🔊 効果音 ON":"🔇 効果音 OFF";b.className="sound-btn"+(soundOn?" on":"")}
+function playTone(type){if(!soundOn)return;try{const ctx=getCtx(),t=ctx.currentTime;if(type==="win"||type==="fanfare"){[523,659,784,1047].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="square";o.frequency.value=f;g.gain.setValueAtTime(0,t+i*.13);g.gain.linearRampToValueAtTime(.12,t+i*.13+.05);g.gain.exponentialRampToValueAtTime(.001,t+i*.13+.25);o.start(t+i*.13);o.stop(t+i*.13+.25)})}else if(type==="damage_player"){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="sawtooth";o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(60,t+.25);g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.25)}else if(type==="damage_enemy"){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="square";o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(200,t+.15);g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.start(t);o.stop(t+.2);const o2=ctx.createOscillator(),g2=ctx.createGain();o2.connect(g2);g2.connect(ctx.destination);o2.type="square";o2.frequency.setValueAtTime(700,t+.06);o2.frequency.exponentialRampToValueAtTime(300,t+.2);g2.gain.setValueAtTime(.15,t+.06);g2.gain.exponentialRampToValueAtTime(.001,t+.22);o2.start(t+.06);o2.stop(t+.22)}else if(type==="heal"){[660,880].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0,t+i*.12);g.gain.linearRampToValueAtTime(.18,t+i*.12+.05);g.gain.exponentialRampToValueAtTime(.001,t+i*.12+.5);o.start(t+i*.12);o.stop(t+i*.12+.5)})}else if(type==="draw"){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="triangle";o.frequency.setValueAtTime(200,t);o.frequency.linearRampToValueAtTime(150,t+.3);g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.start(t);o.stop(t+.35)}else if(type==="select"){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="sine";o.frequency.value=800;g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.08);o.start(t);o.stop(t+.08)}else if(type==="gameover"){[400,300,200,150].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="sawtooth";o.frequency.value=f;g.gain.setValueAtTime(.15,t+i*.18);g.gain.exponentialRampToValueAtTime(.001,t+i*.18+.3);o.start(t+i*.18);o.stop(t+i*.18+.3)})}}catch(e){}}
+let playerHP=10,enemyHP=10,turn=1;const MAX_HP=10;
+const questions=[
+  {text:"お前、口だけだよな",choices:[{text:"具体的にどこが？",type:"logic"},{text:"お前はできてるの？",type:"attack"},{text:"そう思うならそれでいい",type:"calm"}]},
+  {text:"どうせすぐ諦めるくせに",choices:[{text:"根拠を言ってみろ",type:"logic"},{text:"お前に言われたくない",type:"attack"},{text:"俺のことは俺が決める",type:"calm"}]},
+  {text:"お前みたいな奴、どこ行っても同じだよ",choices:[{text:"データ出してから言え",type:"logic"},{text:"お前が一番どこ行っても同じだろ",type:"attack"},{text:"それはお前の思い込みだね",type:"calm"}]},
+  {text:"なんでそんなに自信あるわけ？",choices:[{text:"実績があるから",type:"logic"},{text:"お前には関係ない",type:"attack"},{text:"別に自信があるとは言ってない",type:"calm"}]},
+  {text:"お前って昔から変わらないな",choices:[{text:"変わってないのはお前の見方だろ",type:"logic"},{text:"お前こそ何も変わってないよな",type:"attack"},{text:"変わらなくていい部分もある",type:"calm"}]},
+  {text:"お前に何がわかるんだよ",choices:[{text:"話してみないとわからないだろ",type:"logic"},{text:"お前には絶対わからない",type:"attack"},{text:"わかろうとしてるだけだよ",type:"calm"}]},
+  {text:"さっき逃げただろ",choices:[{text:"戦略的撤退だ",type:"logic"},{text:"お前も逃げてたよな",type:"attack"},{text:"別に逃げてもいいじゃん",type:"calm"}]},
+  {text:"それ前も失敗してたよな",choices:[{text:"失敗から学んでる",type:"logic"},{text:"お前の成功例を教えてよ",type:"attack"},{text:"過去は過去だから",type:"calm"}]},
+  {text:"大口叩いた割に結果でてないじゃん",choices:[{text:"まだ途中だから結果は先の話だ",type:"logic"},{text:"お前の結果は？",type:"attack"},{text:"結果だけが全てじゃない",type:"calm"}]},
+  {text:"そのやり方、絶対うまくいかないって",choices:[{text:"なぜそう言える？根拠は？",type:"logic"},{text:"やってもないのに何がわかる",type:"attack"},{text:"試してみてから判断するよ",type:"calm"}]},
+  {text:"それ、俺が前に言ったことじゃん",choices:[{text:"独立して思いついた可能性もある",type:"logic"},{text:"だったら何なんだよ",type:"attack"},{text:"そうかも、ありがとう（棒）",type:"calm"}]},
+  {text:"お前の言い方、いつも感じ悪いよな",choices:[{text:"具体的にどの発言が？",type:"logic"},{text:"お前の言い方の方が感じ悪い",type:"attack"},{text:"気をつけるよ、でも今は本題に戻ろう",type:"calm"}]},
+  {text:"俺はお前より経験あるから",choices:[{text:"経験と正解は別の話だ",type:"logic"},{text:"それが何の役に立ってる？",type:"attack"},{text:"そうかもしれないね",type:"calm"}]},
+  {text:"お前には無理だって",choices:[{text:"なぜそう思う？",type:"logic"},{text:"お前にわかるわけがない",type:"attack"},{text:"やってみないとわからない",type:"calm"}]},
+  {text:"普通こんなことも知らないの？",choices:[{text:"知らない前提でなぜ話す？",type:"logic"},{text:"お前は全部知ってるの？",type:"attack"},{text:"知らないことは学べばいい",type:"calm"}]},
+  {text:"俺の立場で考えたら当然だろ",choices:[{text:"立場が違えば正解も違う",type:"logic"},{text:"お前の立場が全てじゃない",type:"attack"},{text:"どういう立場か説明して",type:"calm"}]},
+  {text:"お前みたいな素人には難しいよ",choices:[{text:"素人だから違う視点がある",type:"logic"},{text:"素人に負けたらどうする気だ",type:"attack"},{text:"だから聞いてるんだよ",type:"calm"}]},
+  {text:"俺の言う通りにしてたら良かったのに",choices:[{text:"結果が全てではない、プロセスも大事だ",type:"logic"},{text:"お前が正しかったことがあったか？",type:"attack"},{text:"次は参考にするよ",type:"calm"}]},
+  {text:"反論できないんだ？ふーん",choices:[{text:"反論する価値があれば反論する",type:"logic"},{text:"お前の方が黙ってる時間長いよな",type:"attack"},{text:"そうだよ、全部正しいよ（棒）",type:"calm"}]},
+  {text:"お前の話つまんね",choices:[{text:"じゃあお前が面白い話してみろ",type:"logic"},{text:"お前の存在の方がつまんないけど",type:"attack"},{text:"あ、そう",type:"calm"}]},
+  {text:"え、まだ怒ってるの？余裕なさすぎ",choices:[{text:"怒ってるんじゃなくて指摘してる",type:"logic"},{text:"お前が最初に怒らせたんだろ",type:"attack"},{text:"余裕あるから話してるんだよ",type:"calm"}]},
+  {text:"それって言い訳じゃん",choices:[{text:"理由と言い訳は違う",type:"logic"},{text:"お前の話全部言い訳だけどな",type:"attack"},{text:"そう聞こえたなら言い方変えるよ",type:"calm"}]},
+  {text:"お前って本当に頭固いな",choices:[{text:"柔軟さと一貫性は別物だ",type:"logic"},{text:"頭が軽すぎるよりはマシだろ",type:"attack"},{text:"どこがそう見える？",type:"calm"}]},
+  {text:"なんかズレてるんだよな、お前",choices:[{text:"ズレてるという根拠は？",type:"logic"},{text:"お前の方がよっぽどズレてる",type:"attack"},{text:"どういう意味で？",type:"calm"}]},
+  {text:"お前ってなんか暗いよな",choices:[{text:"暗いと何が問題なの？",type:"logic"},{text:"お前の方がよっぽど面白くない",type:"attack"},{text:"そういう人もいるよ",type:"calm"}]},
+  {text:"もっと空気読めよ",choices:[{text:"空気を読むより正確さが大事なときもある",type:"logic"},{text:"お前の空気が悪いんだよ",type:"attack"},{text:"具体的にどの場面？",type:"calm"}]},
+  {text:"お前ってめんどくさいな",choices:[{text:"詳細に話すことのどこがめんどくさい？",type:"logic"},{text:"お前と話す方がめんどくさいよ",type:"attack"},{text:"ごめんね、でも大事なことだから",type:"calm"}]},
+  {text:"なんでそんな細かいことを気にするの？",choices:[{text:"細部が全体の質を決めるから",type:"logic"},{text:"大雑把なお前とは違うんで",type:"attack"},{text:"細かいことを積み重ねると大きくなるから",type:"calm"}]},
+  {text:"お前の考え方、終わってる",choices:[{text:"どこが終わってるか説明してみて",type:"logic"},{text:"お前の人生の方が終わってそうだけど",type:"attack"},{text:"そう思う理由を聞かせて",type:"calm"}]},
+  {text:"正直お前のこと信用できない",choices:[{text:"信用は実績で判断するものだ",type:"logic"},{text:"俺もお前を信用してないから安心しろ",type:"attack"},{text:"信用を取り戻す方法はある？",type:"calm"}]},
+  {text:"お前みたいな人間、周りにいたら迷惑だろ",choices:[{text:"迷惑かどうかは周りが決めることだ",type:"logic"},{text:"お前の方が今まさに迷惑なんだが",type:"attack"},{text:"そういう見方もあるんだね",type:"calm"}]},
+  {text:"どうせ何やっても中途半端なんだろ",choices:[{text:"やり遂げたことはちゃんとある",type:"logic"},{text:"お前が中途半端な評価してるだけじゃん",type:"attack"},{text:"それは俺が判断することだよ",type:"calm"}]}
+];
+const playerIcons={normal:"😤",damage:"😵",win:"🤩"};
+const enemyIcons={normal:"😠",damage:"🤕",lose:"😭"};
+function updateHPBars(){const p=Math.max(0,(playerHP/MAX_HP)*100),e=Math.max(0,(enemyHP/MAX_HP)*100);document.getElementById("playerHPBar").style.width=p+"%";document.getElementById("enemyHPBar").style.width=e+"%";document.getElementById("playerHP").textContent=Math.max(0,playerHP);document.getElementById("enemyHP").textContent=Math.max(0,enemyHP)}
+function showFlash(c){const el=document.createElement("div");el.className="flash "+c;document.body.appendChild(el);setTimeout(()=>el.remove(),380)}
+function showDamageFloat(text,color,targetEl){const rect=targetEl.getBoundingClientRect(),el=document.createElement("div");el.className="dmg-float";el.textContent=text;el.style.color=color;el.style.left=(rect.left+rect.width/2-30)+"px";el.style.top=(rect.top-10)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1100)}
+function typewrite(el,text,speed=28){return new Promise(resolve=>{el.textContent="";const cursor=document.createElement("span");cursor.className="cursor";el.appendChild(cursor);let i=0;const iv=setInterval(()=>{if(i>=text.length){clearInterval(iv);cursor.remove();resolve();return}el.insertBefore(document.createTextNode(text[i]),cursor);i++},speed)})}
+function nextTurn(){if(playerHP<=0){showGameEnd(false);return}if(enemyHP<=0){showGameEnd(true);return}turn++;document.getElementById("turnBadge").textContent="ROUND "+turn;const q=questions[Math.floor(Math.random()*questions.length)];const cd=document.getElementById("choices");cd.innerHTML="";document.getElementById("resultPanel").textContent="…";document.getElementById("resultPanel").style.color="";typewrite(document.getElementById("speechText"),q.text,32).then(()=>{document.getElementById("resultPanel").textContent="返し方を選べ…！";q.choices.forEach(c=>{const btn=document.createElement("button");btn.className="choice-btn";btn.dataset.type=c.type;const lm={logic:"🔵 論理",attack:"🔴 攻撃",calm:"🟢 冷静"};const badge=document.createElement("span");badge.className="type-badge "+c.type;badge.textContent=lm[c.type];btn.appendChild(badge);btn.appendChild(document.createTextNode(c.text));btn.onclick=()=>judge(c.type);cd.appendChild(btn)})})}
+function judge(type){playTone("select");document.querySelectorAll(".choice-btn").forEach(b=>b.disabled=true);const types=["logic","attack","calm"],enemyType=types[Math.floor(Math.random()*3)];const pi=document.getElementById("playerIcon"),ei=document.getElementById("enemyIcon");let result="",resultColor="";if(type==="logic"&&enemyType==="attack"){enemyHP-=3;result="💥 論破成功！相手が言葉に詰まった！";resultColor="#4488ff";showFlash("blue");showDamageFloat("-3 論破！","#4488ff",ei);pi.classList.add("attack-anim");ei.classList.add("shake");playTone("damage_enemy")}else if(type==="attack"&&enemyType==="calm"){enemyHP-=3;result="🔥 強烈な反撃！相手がひるんだ！";resultColor="#ff4444";showFlash("red");showDamageFloat("-3 クリティカル！","#ff4444",ei);pi.classList.add("attack-anim");ei.classList.add("shake");playTone("damage_enemy")}else if(type==="calm"&&enemyType==="logic"){playerHP=Math.min(MAX_HP,playerHP+1);result="✨ 冷静な対応で精神力が回復した！";resultColor="#44cc88";showFlash("green");showDamageFloat("+1 回復！","#44cc88",pi);playTone("heal")}else if(type==="logic"&&enemyType==="calm"){playerHP-=2;result="😓 相手にさらっとかわされた…";resultColor="#888";showFlash("red");showDamageFloat("-2","#ff4444",pi);pi.classList.add("shake");ei.classList.add("attack-anim");playTone("damage_player")}else if(type==="attack"&&enemyType==="logic"){playerHP-=2;result="🤯 論理で返されてダメージを受けた！";resultColor="#888";showFlash("red");showDamageFloat("-2","#ff4444",pi);pi.classList.add("shake");ei.classList.add("attack-anim");playTone("damage_player")}else if(type==="calm"&&enemyType==="attack"){playerHP-=2;result="😣 強引に押し込まれて押し負けた…";resultColor="#888";showFlash("red");showDamageFloat("-2","#ff4444",pi);pi.classList.add("shake");ei.classList.add("attack-anim");playTone("damage_player")}else{playerHP-=1;result="💢 引き分け…お互いに消耗した";resultColor="#aa8800";showFlash("red");showDamageFloat("-1","#aaa",pi);pi.classList.add("shake");ei.classList.add("shake");playTone("draw")}updateHPBars();const rp=document.getElementById("resultPanel");rp.textContent=result;rp.style.color=resultColor;rp.classList.add("combo-flash");setTimeout(()=>rp.classList.remove("combo-flash"),400);setTimeout(()=>{pi.classList.remove("shake","attack-anim");ei.classList.remove("shake","attack-anim")},400);if(playerHP<=0){pi.textContent=playerIcons.damage;playTone("gameover");setTimeout(()=>showGameEnd(false),900);return}if(enemyHP<=0){ei.textContent=enemyIcons.lose;playTone("fanfare");setTimeout(()=>showGameEnd(true),900);return}setTimeout(nextTurn,1500)}
+function showGameEnd(win){const el=document.createElement("div");el.className="game-end";const txt=document.createElement("div");txt.className="game-end-text";txt.textContent=win?"🏆 論破完了！":"💀 言い負けた…";txt.style.color=win?"#ffd700":"#ff4444";const sub=document.createElement("div");sub.className="game-end-sub";sub.textContent=win?"完璧な口喧嘩だ！":"もう一度挑め！";const btn=document.createElement("button");btn.className="retry-btn";btn.textContent="🔄 もう一回やる";btn.onclick=()=>{el.remove();resetGame()};el.appendChild(txt);el.appendChild(sub);el.appendChild(btn);document.body.appendChild(el)}
+function resetGame(){playerHP=10;enemyHP=10;turn=0;document.getElementById("playerIcon").textContent=playerIcons.normal;document.getElementById("enemyIcon").textContent=enemyIcons.normal;document.getElementById("resultPanel").style.color="";updateHPBars();nextTurn()}
+updateHPBars();nextTurn();
+</script>
+</body>
+</html>

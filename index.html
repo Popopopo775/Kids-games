@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ゲームセンター🎮</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@700&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #FF3D5A;
+      --orange: #FF7A00;
+      --yellow: #FFD600;
+      --green: #00C853;
+      --blue: #2979FF;
+      --purple: #AA00FF;
+      --pink: #FF4081;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: #0a0a1a;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* 背景の星 */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--d) infinite ease-in-out alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.1; transform: scale(0.8); }
+      to   { opacity: 0.9; transform: scale(1.2); }
+    }
+
+    /* ヘッダー */
+    header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 60px 20px 30px;
+    }
+
+    .title-wrap {
+      display: inline-block;
+      position: relative;
+    }
+
+    .title-sub {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      color: var(--yellow);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    h1 {
+      font-family: 'Kaisei Decol', serif;
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      line-height: 1;
+      background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 40%, var(--red) 70%, var(--pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 30px rgba(255, 122, 0, 0.5));
+      animation: fadeDown 0.6s 0.1s ease both;
+    }
+
+    .title-deco {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 12px;
+      animation: fadeDown 0.6s 0.2s ease both;
+    }
+    .title-deco span {
+      font-size: 1.6rem;
+      animation: bounce 1.5s infinite ease-in-out;
+    }
+    .title-deco span:nth-child(2) { animation-delay: 0.2s; }
+    .title-deco span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ゲームカード一覧 */
+    .games-grid {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 24px 80px;
+    }
+
+    .game-card {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      text-decoration: none;
+      display: block;
+      transform: translateY(40px);
+      opacity: 0;
+      animation: cardIn 0.6s ease forwards;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .game-card:nth-child(1) { animation-delay: 0.3s; }
+    .game-card:nth-child(2) { animation-delay: 0.45s; }
+    .game-card:nth-child(3) { animation-delay: 0.6s; }
+
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .game-card:active {
+      transform: scale(0.97);
+    }
+
+    .card-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+    .game-card:hover .card-bg {
+      opacity: 0.85;
+    }
+
+    /* カード1: 口喧嘩ファイト */
+    .card-1 .card-bg {
+      background: linear-gradient(135deg, #FF3D5A 0%, #FF7A00 100%);
+    }
+    /* カード2: ランチファイヤー */
+    .card-2 .card-bg {
+      background: linear-gradient(135deg, #FF7A00 0%, #FFD600 100%);
+    }
+    /* カード3: 炎上回避 */
+    .card-3 .card-bg {
+      background: linear-gradient(135deg, #AA00FF 0%, #2979FF 100%);
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+      padding: 36px 28px 32px;
+    }
+
+    .card-emoji {
+      font-size: 4rem;
+      display: block;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      transition: transform 0.3s ease;
+    }
+    .game-card:hover .card-emoji {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    .card-title {
+      font-family: 'Kaisei Decol', serif;
+      font-size: 1.8rem;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      color: #0a0a1a;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 900;
+      font-size: 1rem;
+      padding: 12px 24px;
+      border-radius: 50px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .game-card:hover .play-btn {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    .play-btn .arrow {
+      font-size: 1.1rem;
+      transition: transform 0.2s;
+    }
+    .game-card:hover .play-btn .arrow {
+      transform: translateX(4px);
+    }
+
+    /* デコレーション図形 */
+    .card-deco {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .deco-1 { width: 120px; height: 120px; background: white; top: -30px; right: -30px; }
+    .deco-2 { width: 60px; height: 60px; background: white; bottom: 20px; right: 20px; }
+
+    /* フッター */
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 20px;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 星の背景 -->
+  <div class="stars" id="stars"></div>
+
+  <header>
+    <div class="title-wrap">
+      <p class="title-sub">🌟 Welcome to 🌟</p>
+      <h1>ゲームセンター</h1>
+      <div class="title-deco">
+        <span>🎮</span>
+        <span>🕹️</span>
+        <span>🎯</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="games-grid">
+
+    <a href="kuchikenkafight.html" class="game-card card-1">
+      <div class="card-bg"></div>
+      <div class="card-deco deco-1"></div>
+      <div class="card-deco deco-2"></div>
+      <div class="card-inner">
+        <span class="card-emoji">💬⚡</span>
+        <h2 class="card-title">口喧嘩ファイト</h2>
+        <p class="card-desc">言葉でたたかえ！<br>最強の口喧嘩師をめざせ！</p>
+        <div class="play-btn">あそぶ <span class="arrow">→</span></div>
+      </div>
+    </a>
+
+    <a href="lunchfire.html" class="game-card card-2">
+      <div class="card-bg"></div>
+      <div class="card-deco deco-1"></div>
+      <div class="card-deco deco-2"></div>
+      <div class="card-inner">
+        <span class="card-emoji">🍱🔥</span>
+        <h2 class="card-title">ランチファイヤー</h2>
+        <p class="card-desc">お昼ごはんがもえてる！<br>はやくたべてひやせ！</p>
+        <div class="play-btn">あそぶ <span class="arrow">→</span></div>
+      </div>
+    </a>
+
+    <a href="enjo-kaihi.html" class="game-card card-3">
+      <div class="card-bg"></div>
+      <div class="card-deco deco-1"></div>
+      <div class="card-deco deco-2"></div>
+      <div class="card-inner">
+        <span class="card-emoji">🌐💨</span>
+        <h2 class="card-title">炎上回避</h2>
+        <p class="card-desc">ネットの炎上をかわせ！<br>サバイバルチャレンジ！</p>
+        <div class="play-btn">あそぶ <span class="arrow">→</span></div>
+      </div>
+    </a>
+
+  </main>
+
+  <footer>© 2025 ゲームセンター</footer>
+
+  <script>
+    // 星を生成
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        top: ${Math.random() * 100}%;
+        left: ${Math.random() * 100}%;
+        --d: ${Math.random() * 3 + 1.5}s;
+        animation-delay: ${Math.random() * 3}s;
+      `;
+      starsEl.appendChild(s);
+    }
+  </script>
+</body>
+</html>

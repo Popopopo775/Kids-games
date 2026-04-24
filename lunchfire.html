@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🔥 ランチファイヤー</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
+
+:root {
+–fire: #ff4500;
+–fire2: #ff8c00;
+–yellow: #ffd700;
+–bg: #1a0a00;
+–panel: #2d1200;
+–panel2: #3d1a00;
+–text: #fff8f0;
+–safe: #4caf50;
+–danger: #ff1744;
+–gauge-w: 260px;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+background: var(–bg);
+font-family: ‘M PLUS Rounded 1c’, sans-serif;
+color: var(–text);
+min-height: 100dvh;
+display: flex;
+flex-direction: column;
+align-items: center;
+overflow: hidden;
+position: relative;
+}
+
+/* Flame background */
+.bg-flames {
+position: fixed; inset: 0; pointer-events: none; z-index: 0;
+overflow: hidden;
+}
+.flame-particle {
+position: absolute;
+bottom: -20px;
+width: 6px; height: 6px;
+border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+animation: rise linear infinite;
+opacity: 0;
+}
+@keyframes rise {
+0% { transform: translateY(0) scale(1); opacity: 0.7; }
+80% { opacity: 0.3; }
+100% { transform: translateY(-110vh) scale(0.2); opacity: 0; }
+}
+
+/* ===== SCREENS ===== */
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s; }
+.screen.hidden { opacity: 0; pointer-events: none; }
+
+/* Title screen */
+#title-screen {
+background: radial-gradient(ellipse at bottom, #3d1500 0%, #1a0a00 70%);
+}
+.title-logo {
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-size: 3rem;
+font-weight: 900;
+background: linear-gradient(135deg, #ff4500, #ffd700, #ff8c00);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+text-align: center;
+line-height: 1.1;
+text-shadow: none;
+filter: drop-shadow(0 0 20px rgba(255,100,0,0.6));
+animation: pulse-glow 2s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+0%,100% { filter: drop-shadow(0 0 15px rgba(255,100,0,0.5)); }
+50% { filter: drop-shadow(0 0 35px rgba(255,200,0,0.8)); }
+}
+.title-sub {
+font-size: 0.95rem;
+color: #ffb070;
+margin-top: 8px;
+text-align: center;
+letter-spacing: 0.05em;
+}
+.title-emoji { font-size: 5rem; display: block; margin: 20px 0; animation: bounce 1.5s ease-in-out infinite; }
+@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+.btn {
+background: linear-gradient(135deg, #ff4500, #ff8c00);
+color: #fff;
+border: none;
+padding: 16px 40px;
+font-size: 1.2rem;
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-weight: 700;
+border-radius: 50px;
+cursor: pointer;
+box-shadow: 0 6px 24px rgba(255,70,0,0.5);
+transition: transform 0.15s, box-shadow 0.15s;
+margin-top: 24px;
+}
+.btn:active { transform: scale(0.94); box-shadow: 0 2px 10px rgba(255,70,0,0.4); }
+.how-to {
+font-size: 0.8rem;
+color: #ff9050;
+text-align: center;
+margin-top: 18px;
+max-width: 300px;
+line-height: 1.6;
+}
+
+/* ===== GAME SCREEN ===== */
+#game-screen {
+background: transparent;
+flex-direction: column;
+justify-content: flex-start;
+padding: 0;
+}
+
+/* Header */
+.game-header {
+width: 100%;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 14px 20px 8px;
+background: rgba(30,10,0,0.9);
+border-bottom: 2px solid #ff450033;
+z-index: 20;
+position: relative;
+}
+.score-box {
+background: var(–panel2);
+border: 1px solid #ff450055;
+border-radius: 12px;
+padding: 6px 14px;
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-size: 0.85rem;
+color: var(–yellow);
+}
+.score-num { font-size: 1.3rem; font-weight: 900; }
+.level-box {
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-size: 0.8rem;
+color: #ffb070;
+text-align: center;
+}
+.level-num { font-size: 1.4rem; font-weight: 900; color: var(–fire2); }
+
+/* Gauge section */
+.gauge-section {
+width: 100%;
+padding: 14px 24px 10px;
+background: rgba(25,8,0,0.95);
+position: relative;
+}
+.gauge-label {
+display: flex;
+justify-content: space-between;
+font-size: 0.78rem;
+color: #ff9060;
+margin-bottom: 6px;
+}
+.gauge-track {
+width: 100%;
+height: 32px;
+background: #1a0800;
+border-radius: 16px;
+border: 2px solid #ff450044;
+overflow: hidden;
+position: relative;
+}
+.gauge-fill {
+height: 100%;
+border-radius: 14px;
+transition: width 0.35s cubic-bezier(0.4,0,0.2,1), background 0.3s;
+position: relative;
+overflow: hidden;
+}
+.gauge-fill::after {
+content: ‘’;
+position: absolute;
+top: 4px; left: 0; right: 0;
+height: 8px;
+background: rgba(255,255,255,0.25);
+border-radius: 10px;
+}
+.gauge-fill.safe { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
+.gauge-fill.warn { background: linear-gradient(90deg, #e65100, #ff9800); }
+.gauge-fill.danger { background: linear-gradient(90deg, #b71c1c, #ff1744); animation: shake-gauge 0.3s ease-in-out; }
+.gauge-fill.full { background: linear-gradient(90deg, #f00, #ff0000); animation: explode-gauge 0.5s ease-out; }
+
+@keyframes shake-gauge {
+0%,100% { transform: translateX(0); }
+25% { transform: translateX(-3px); }
+75% { transform: translateX(3px); }
+}
+@keyframes explode-gauge {
+0% { transform: scaleY(1); }
+50% { transform: scaleY(1.4); }
+100% { transform: scaleY(1); }
+}
+
+/* Danger zone marker */
+.gauge-danger-zone {
+position: absolute;
+top: 0; right: 0;
+width: 20%;
+height: 100%;
+background: repeating-linear-gradient(45deg, rgba(255,0,0,0.08) 0px, rgba(255,0,0,0.08) 4px, transparent 4px, transparent 8px);
+border-left: 2px dashed rgba(255,50,50,0.5);
+pointer-events: none;
+}
+.gauge-target-line {
+position: absolute;
+top: 0;
+height: 100%;
+width: 3px;
+background: #ffdd00;
+box-shadow: 0 0 8px #ffdd00;
+pointer-events: none;
+z-index: 2;
+}
+.target-label {
+position: absolute;
+top: -20px;
+transform: translateX(-50%);
+font-size: 0.6rem;
+color: #ffdd00;
+white-space: nowrap;
+font-weight: 700;
+}
+
+/* Stomach emoji */
+.stomach-display {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-top: 8px;
+}
+.stomach-emoji-wrap {
+font-size: 2.2rem;
+transition: transform 0.2s;
+}
+.stomach-emoji-wrap.eat { animation: stomach-bounce 0.3s ease-out; }
+@keyframes stomach-bounce {
+0% { transform: scale(1); }
+50% { transform: scale(1.35) rotate(-8deg); }
+100% { transform: scale(1); }
+}
+.gauge-percent {
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-size: 1.5rem;
+font-weight: 900;
+color: var(–yellow);
+}
+.stomach-message {
+font-size: 0.78rem;
+color: #ffb080;
+}
+
+/* Stop button */
+.stop-btn {
+background: linear-gradient(135deg, #c62828, #ff1744);
+color: #fff;
+border: none;
+padding: 10px 28px;
+font-size: 1rem;
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-weight: 700;
+border-radius: 50px;
+cursor: pointer;
+box-shadow: 0 4px 16px rgba(255,0,60,0.4);
+transition: transform 0.12s;
+margin-top: 10px;
+width: calc(100% - 48px);
+margin-left: 24px;
+margin-right: 24px;
+}
+.stop-btn:active { transform: scale(0.96); }
+.stop-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Food area */
+.food-area {
+flex: 1;
+width: 100%;
+position: relative;
+overflow: hidden;
+min-height: 320px;
+}
+.food-item {
+position: absolute;
+font-size: 3rem;
+cursor: pointer;
+user-select: none;
+transition: transform 0.1s;
+animation: food-appear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+z-index: 5;
+}
+@keyframes food-appear {
+from { transform: scale(0) rotate(-30deg); opacity: 0; }
+to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.food-item:active { transform: scale(0.85); }
+.food-item.eaten {
+animation: food-eat 0.4s ease-out forwards;
+pointer-events: none;
+}
+@keyframes food-eat {
+0% { transform: scale(1); opacity: 1; }
+40% { transform: scale(1.6) rotate(20deg); opacity: 1; }
+100% { transform: scale(0) rotate(45deg); opacity: 0; }
+}
+.food-item.float-away {
+animation: food-float 0.6s ease-in forwards;
+pointer-events: none;
+}
+@keyframes food-float {
+0% { transform: scale(1); opacity: 1; }
+100% { transform: translateY(-80px) scale(0.5); opacity: 0; }
+}
+
+/* Score popup */
+.score-popup {
+position: absolute;
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-weight: 900;
+font-size: 1.4rem;
+pointer-events: none;
+z-index: 20;
+animation: popup-rise 0.9s ease-out forwards;
+text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+}
+@keyframes popup-rise {
+0% { transform: translateY(0) scale(0.8); opacity: 1; }
+100% { transform: translateY(-70px) scale(1.1); opacity: 0; }
+}
+
+/* Label under food */
+.food-label {
+position: absolute;
+font-size: 0.65rem;
+color: #ffcc80;
+text-align: center;
+white-space: nowrap;
+pointer-events: none;
+top: 3.6rem;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(0,0,0,0.6);
+padding: 2px 6px;
+border-radius: 8px;
+}
+
+/* ===== RESULT SCREEN ===== */
+#result-screen {
+background: radial-gradient(ellipse at center, #2d0d00 0%, #0d0300 80%);
+}
+.result-title {
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-size: 2.2rem;
+font-weight: 900;
+text-align: center;
+}
+.result-title.great { color: var(–yellow); text-shadow: 0 0 30px rgba(255,215,0,0.6); }
+.result-title.good { color: #4caf50; }
+.result-title.over { color: var(–danger); animation: shake-title 0.5s ease; }
+@keyframes shake-title {
+0%,100% { transform: translateX(0); }
+20% { transform: translateX(-12px); }
+40% { transform: translateX(12px); }
+60% { transform: translateX(-8px); }
+80% { transform: translateX(8px); }
+}
+.result-emoji { font-size: 5rem; margin: 16px 0; }
+.result-stats {
+background: var(–panel);
+border: 1px solid #ff450033;
+border-radius: 16px;
+padding: 20px 32px;
+text-align: center;
+margin: 12px 0;
+}
+.stat-row { margin: 8px 0; font-size: 0.95rem; color: #ffb080; }
+.stat-val { font-size: 1.5rem; font-weight: 700; color: var(–yellow); }
+.result-msg { font-size: 0.9rem; color: #ff9060; text-align: center; margin: 10px 0; }
+
+/* Combo display */
+.combo-display {
+position: fixed;
+top: 160px;
+left: 50%;
+transform: translateX(-50%);
+font-family: ‘Zen Maru Gothic’, sans-serif;
+font-size: 1.8rem;
+font-weight: 900;
+color: var(–yellow);
+text-shadow: 0 0 20px rgba(255,215,0,0.8);
+pointer-events: none;
+z-index: 30;
+opacity: 0;
+transition: opacity 0.3s;
+}
+.combo-display.show { opacity: 1; animation: combo-pop 0.5s ease-out; }
+@keyframes combo-pop {
+0% { transform: translateX(-50%) scale(0.5); }
+60% { transform: translateX(-50%) scale(1.2); }
+100% { transform: translateX(-50%) scale(1); }
+}
+
+/* Timer bar (per-level countdown) */
+.timer-bar-wrap {
+width: calc(100% - 48px);
+height: 6px;
+background: #2a1000;
+border-radius: 3px;
+margin: 8px 24px 0;
+overflow: hidden;
+}
+.timer-bar-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–fire2), var(–yellow));
+border-radius: 3px;
+transition: width 0.1s linear, background 0.3s;
+}
+</style>
+
+</head>
+<body>
+
+<!-- Animated BG flames -->
+
+<div class="bg-flames" id="bgFlames"></div>
+
+<!-- Combo indicator -->
+
+<div class="combo-display" id="comboDisplay"></div>
+
+<!-- ===== TITLE SCREEN ===== -->
+
+<div class="screen" id="title-screen">
+  <div class="title-logo">🔥ランチ<br>ファイヤー🔥</div>
+  <span class="title-sub">〜 胃袋限界チャレンジ 〜</span>
+  <span class="title-emoji">🍽️</span>
+  <button class="btn" onclick="startGame()">🔥 スタート！</button>
+  <p class="how-to">
+    食べ物をタップして食べよう！<br>
+    胃袋ゲージがMAXになったら爆発💥<br>
+    ギリギリでストップが高得点🌟
+  </p>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+
+<div class="screen hidden" id="game-screen">
+  <!-- Header -->
+  <div class="game-header">
+    <div class="score-box">
+      スコア<br><span class="score-num" id="scoreDisplay">0</span>
+    </div>
+    <div class="level-box">
+      LEVEL<br><span class="level-num" id="levelDisplay">1</span>
+    </div>
+    <div class="score-box">
+      コンボ🔥<br><span class="score-num" id="comboCount">0</span>
+    </div>
+  </div>
+
+  <!-- Gauge -->
+
+  <div class="gauge-section">
+    <div class="gauge-label">
+      <span>胃袋ゲージ</span>
+      <span id="gaugeTextRight">80%でストップ推奨！</span>
+    </div>
+    <div class="gauge-track">
+      <div class="gauge-fill safe" id="gaugeFill" style="width:0%"></div>
+      <div class="gauge-danger-zone"></div>
+      <div class="gauge-target-line" id="targetLine" style="left:80%">
+        <span class="target-label">🎯ベスト</span>
+      </div>
+    </div>
+    <div class="stomach-display">
+      <div class="stomach-emoji-wrap" id="stomachEmoji">😊</div>
+      <div>
+        <div class="gauge-percent" id="gaugePercent">0%</div>
+        <div class="stomach-message" id="stomachMsg">お腹すいた〜！食べよう！</div>
+      </div>
+    </div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="timerBar" style="width:100%"></div>
+    </div>
+  </div>
+
+  <button class="stop-btn" id="stopBtn" onclick="stopEating()" disabled>
+    🛑 ここでストップ！（もうお腹いっぱい）
+  </button>
+
+  <!-- Food falling area -->
+
+  <div class="food-area" id="foodArea"></div>
+</div>
+
+<!-- ===== RESULT SCREEN ===== -->
+
+<div class="screen hidden" id="result-screen">
+  <div class="result-title" id="resultTitle">すごい！</div>
+  <div class="result-emoji" id="resultEmoji">🏆</div>
+  <div class="result-stats">
+    <div class="stat-row">最終スコア <div class="stat-val" id="finalScore">0</div></div>
+    <div class="stat-row">胃袋充填率 <div class="stat-val" id="finalGauge">0%</div></div>
+    <div class="stat-row">到達レベル <div class="stat-val" id="finalLevel">1</div></div>
+    <div class="stat-row">最大コンボ <div class="stat-val" id="finalCombo">0</div></div>
+  </div>
+  <div class="result-msg" id="resultMsg"></div>
+  <button class="btn" onclick="startGame()">🔥 もう一回！</button>
+  <button class="btn" style="background:linear-gradient(135deg,#4a1500,#8a3000);box-shadow:none;margin-top:10px;font-size:1rem;" onclick="showTitle()">🏠 タイトルへ</button>
+</div>
+
+<script>
+// ===== AUDIO ENGINE (Web Audio API) =====
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playTone({ type = 'sine', freq = 440, freq2 = null, duration = 0.15, volume = 0.3, attack = 0.01, decay = 0.05, release = 0.08, detune = 0 } = {}) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if (freq2) osc.frequency.linearRampToValueAtTime(freq2, ctx.currentTime + duration);
+    osc.detune.value = detune;
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + attack);
+    gain.gain.linearRampToValueAtTime(volume * 0.7, ctx.currentTime + attack + decay);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration + 0.01);
+  } catch(e) {}
+}
+
+function playNoise({ duration = 0.15, volume = 0.2, freq = 800, q = 5 } = {}) {
+  try {
+    const ctx = getAudioCtx();
+    const bufSize = ctx.sampleRate * duration;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = freq;
+    filter.Q.value = q;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+  } catch(e) {}
+}
+
+const SFX = {
+  // タップ・食べる音 - 明るいポップ音
+  eat() {
+    playTone({ type: 'square', freq: 520, freq2: 780, duration: 0.12, volume: 0.18, attack: 0.005, decay: 0.02 });
+    playTone({ type: 'sine', freq: 880, freq2: 1100, duration: 0.1, volume: 0.12, attack: 0.005 });
+  },
+  // ボーナス薬タップ - キラキラ上昇音
+  bonus() {
+    [0, 0.05, 0.1, 0.15].forEach((t, i) => {
+      setTimeout(() => playTone({ type: 'sine', freq: 660 + i * 220, duration: 0.12, volume: 0.2, attack: 0.005 }), t * 1000);
+    });
+  },
+  // 毒・激辛 - 不快な下降音
+  poison() {
+    playTone({ type: 'sawtooth', freq: 400, freq2: 180, duration: 0.25, volume: 0.22, attack: 0.01 });
+    playNoise({ duration: 0.15, volume: 0.15, freq: 200, q: 2 });
+  },
+  // コンボ！ - 明るいファンファーレ風
+  combo(n) {
+    const base = 440 + Math.min(n, 8) * 40;
+    playTone({ type: 'square', freq: base, freq2: base * 1.5, duration: 0.18, volume: 0.2 });
+    setTimeout(() => playTone({ type: 'sine', freq: base * 1.5, duration: 0.15, volume: 0.22 }), 80);
+  },
+  // レベルアップ - 上昇アルペジオ
+  levelUp() {
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((f, i) => {
+      setTimeout(() => playTone({ type: 'sine', freq: f, duration: 0.18, volume: 0.25, attack: 0.01 }), i * 80);
+    });
+  },
+  // ゲージ警告 (75%超) - 低い警告音
+  warning() {
+    playTone({ type: 'sawtooth', freq: 220, freq2: 200, duration: 0.2, volume: 0.15, attack: 0.02 });
+    setTimeout(() => playTone({ type: 'sawtooth', freq: 220, freq2: 200, duration: 0.2, volume: 0.15 }), 250);
+  },
+  // ゲージ危険 (90%超) - 緊急アラーム
+  alarm() {
+    playTone({ type: 'square', freq: 880, duration: 0.1, volume: 0.2, attack: 0.005 });
+    setTimeout(() => playTone({ type: 'square', freq: 660, duration: 0.1, volume: 0.2 }), 120);
+  },
+  // ストップ！ - 決定音
+  stop() {
+    playTone({ type: 'sine', freq: 660, duration: 0.12, volume: 0.28, attack: 0.01 });
+    setTimeout(() => playTone({ type: 'sine', freq: 880, duration: 0.18, volume: 0.28 }), 100);
+    setTimeout(() => playTone({ type: 'sine', freq: 1100, duration: 0.25, volume: 0.25 }), 200);
+  },
+  // 爆発！ - ドカン
+  explosion() {
+    playNoise({ duration: 0.6, volume: 0.45, freq: 120, q: 0.8 });
+    playTone({ type: 'sawtooth', freq: 80, freq2: 30, duration: 0.5, volume: 0.3, attack: 0.01 });
+    setTimeout(() => playNoise({ duration: 0.4, volume: 0.25, freq: 300, q: 1 }), 100);
+  },
+  // ゲームクリア - 勝利ファンファーレ
+  victory() {
+    const melody = [523, 659, 784, 659, 784, 1047];
+    melody.forEach((f, i) => {
+      setTimeout(() => playTone({ type: 'sine', freq: f, duration: 0.2, volume: 0.28, attack: 0.01 }), i * 100);
+    });
+  },
+  // スタート - ゲーム開始音
+  start() {
+    [392, 494, 587, 784].forEach((f, i) => {
+      setTimeout(() => playTone({ type: 'triangle', freq: f, duration: 0.15, volume: 0.22, attack: 0.01 }), i * 70);
+    });
+  },
+  // 食べ物出現 - ポコン
+  spawn() {
+    playTone({ type: 'sine', freq: 350, freq2: 420, duration: 0.08, volume: 0.1, attack: 0.005 });
+  },
+};
+
+// ===== DATA =====
+const FOODS = [
+  { emoji: '🍙', name: 'おにぎり', cal: 15, pts: 10 },
+  { emoji: '🍜', name: 'ラーメン', cal: 25, pts: 20 },
+  { emoji: '🍕', name: 'ピザ', cal: 30, pts: 25 },
+  { emoji: '🍣', name: 'お寿司', cal: 12, pts: 15 },
+  { emoji: '🍔', name: 'バーガー', cal: 35, pts: 30 },
+  { emoji: '🍟', name: 'フライ', cal: 18, pts: 12 },
+  { emoji: '🌮', name: 'タコス', cal: 22, pts: 18 },
+  { emoji: '🍰', name: 'ケーキ', cal: 28, pts: 22 },
+  { emoji: '🍩', name: 'ドーナツ', cal: 20, pts: 16 },
+  { emoji: '🥪', name: 'サンドイッチ', cal: 16, pts: 13 },
+  { emoji: '🍛', name: 'カレー', cal: 32, pts: 28 },
+  { emoji: '🥗', name: 'サラダ', cal: 5, pts: 5 },
+  { emoji: '🍱', name: 'お弁当', cal: 38, pts: 35 },
+  { emoji: '🦐', name: 'エビフライ', cal: 20, pts: 18 },
+  { emoji: '🍦', name: 'アイス', cal: 15, pts: 12 },
+  { emoji: '🥩', name: 'ステーキ', cal: 40, pts: 38 },
+  { emoji: '🍝', name: 'パスタ', cal: 26, pts: 22 },
+  { emoji: '🥐', name: 'クロワッサン', cal: 14, pts: 11 },
+  { emoji: '🌯', name: 'ラップ', cal: 18, pts: 14 },
+  { emoji: '🍤', name: 'エビ天', cal: 22, pts: 19 },
+  { emoji: '🥟', name: '餃子', cal: 10, pts: 9 },
+  { emoji: '🍖', name: '骨付き肉', cal: 35, pts: 32 },
+  { emoji: '🫙', name: 'おかず', cal: 8, pts: 7 },
+  { emoji: '🥚', name: '玉子', cal: 7, pts: 6 },
+  { emoji: '🧆', name: 'コロッケ', cal: 18, pts: 15 },
+];
+
+const BONUS_FOODS = [
+  { emoji: '💊', name: '胃薬', cal: -20, pts: 50, bonus: true },
+  { emoji: '🥤', name: 'ダイエット飲料', cal: -10, pts: 30, bonus: true },
+  { emoji: '🍵', name: '緑茶', cal: -5, pts: 15, bonus: true },
+];
+
+const POISON_FOODS = [
+  { emoji: '🌶️', name: '激辛', cal: 50, pts: -10, poison: true },
+  { emoji: '🫃', name: '満腹丸', cal: 45, pts: -5, poison: true },
+];
+
+// ===== STATE =====
+let gauge = 0;
+let score = 0;
+let level = 1;
+let combo = 0;
+let maxCombo = 0;
+let gameActive = false;
+let foods = [];
+let spawnTimer = null;
+let comboTimeout = null;
+let levelTimer = null;
+let levelTimeLeft = 1;
+let levelDuration = 30;
+let levelInterval = null;
+
+// ===== INIT =====
+function initFlames() {
+  const container = document.getElementById('bgFlames');
+  const colors = ['#ff4500','#ff6600','#ff8c00','#ffd700','#ff2200'];
+  for (let i = 0; i < 18; i++) {
+    const f = document.createElement('div');
+    f.className = 'flame-particle';
+    f.style.left = Math.random() * 100 + '%';
+    f.style.width = f.style.height = (4 + Math.random() * 8) + 'px';
+    f.style.background = colors[Math.floor(Math.random() * colors.length)];
+    f.style.animationDuration = (3 + Math.random() * 5) + 's';
+    f.style.animationDelay = (-Math.random() * 8) + 's';
+    container.appendChild(f);
+  }
+}
+initFlames();
+
+// ===== SCREENS =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+function showTitle() {
+  clearAllTimers();
+  showScreen('title-screen');
+}
+
+// ===== GAME START =====
+function startGame() {
+  gauge = 0; score = 0; level = 1; combo = 0; maxCombo = 0;
+  gameActive = true;
+  document.getElementById('foodArea').innerHTML = '';
+  updateUI();
+  document.getElementById('stopBtn').disabled = false;
+  showScreen('game-screen');
+  SFX.start();
+  startLevel();
+}
+
+function startLevel() {
+  clearAllTimers();
+  levelDuration = Math.max(12, 30 - level * 2);
+  levelTimeLeft = levelDuration;
+  updateTimerBar();
+
+  levelInterval = setInterval(() => {
+    levelTimeLeft -= 0.1;
+    updateTimerBar();
+    if (levelTimeLeft <= 0) {
+      advanceLevel();
+    }
+  }, 100);
+
+  scheduleSpawn();
+}
+
+function advanceLevel() {
+  level++;
+  score += 100 * level;
+  document.getElementById('levelDisplay').textContent = level;
+  SFX.levelUp();
+  showComboText(`レベル${level}！🔥`);
+  startLevel();
+}
+
+function clearAllTimers() {
+  if (spawnTimer) clearTimeout(spawnTimer);
+  if (levelInterval) clearInterval(levelInterval);
+  spawnTimer = null;
+  levelInterval = null;
+}
+
+// ===== SPAWN FOOD =====
+function scheduleSpawn() {
+  if (!gameActive) return;
+  const delay = Math.max(400, 1400 - level * 80);
+  spawnTimer = setTimeout(() => {
+    spawnFood();
+    scheduleSpawn();
+  }, delay);
+}
+
+function spawnFood() {
+  if (!gameActive) return;
+  const area = document.getElementById('foodArea');
+  const rect = area.getBoundingClientRect();
+
+  // Pick food type
+  let pool = [...FOODS];
+  if (level >= 3 && Math.random() < 0.1) pool = [...pool, ...BONUS_FOODS];
+  if (level >= 4 && Math.random() < 0.12) pool = [...pool, ...POISON_FOODS];
+
+  const food = pool[Math.floor(Math.random() * pool.length)];
+
+  const item = document.createElement('div');
+  item.className = 'food-item';
+  item.innerHTML = `${food.emoji}<span class="food-label">${food.name}<br><small style="color:${food.cal > 0 ? '#ff9060' : '#80ff80'}">+${food.cal}%</small></span>`;
+
+  const maxX = Math.max(10, rect.width - 80);
+  const maxY = Math.max(10, rect.height - 100);
+  item.style.left = (10 + Math.random() * maxX) + 'px';
+  item.style.top = (10 + Math.random() * maxY) + 'px';
+
+  // Auto-expire
+  const expire = Math.max(1500, 3500 - level * 200);
+  item.addEventListener('click', () => eatFood(item, food, area));
+
+  area.appendChild(item);
+  SFX.spawn();
+
+  setTimeout(() => {
+    if (item.parentNode && !item.classList.contains('eaten')) {
+      item.classList.add('float-away');
+      if (!food.bonus && !food.poison) combo = 0;
+      setTimeout(() => item.remove(), 600);
+    }
+  }, expire);
+}
+
+// ===== EAT =====
+function eatFood(item, food, area) {
+  if (!gameActive || item.classList.contains('eaten')) return;
+  item.classList.add('eaten');
+
+  const rect = item.getBoundingClientRect();
+  const areaRect = area.getBoundingClientRect();
+
+  gauge = Math.max(0, Math.min(100, gauge + food.cal));
+  combo = food.poison ? 0 : combo + 1;
+  if (combo > maxCombo) maxCombo = combo;
+
+  // Sound
+  if (food.bonus) SFX.bonus();
+  else if (food.poison) SFX.poison();
+  else SFX.eat();
+
+  const multiplier = Math.min(combo, 5);
+  const pts = Math.max(0, food.pts * multiplier);
+  score += pts;
+
+  // Score popup
+  const popup = document.createElement('div');
+  popup.className = 'score-popup';
+  popup.style.left = (rect.left - areaRect.left + 20) + 'px';
+  popup.style.top = (rect.top - areaRect.top) + 'px';
+  popup.textContent = food.bonus ? `💊+${pts}` : food.poison ? `💀${food.pts}` : `+${pts}`;
+  popup.style.color = food.bonus ? '#80ff80' : food.poison ? '#ff4444' : combo >= 3 ? '#ffd700' : '#ffffff';
+  area.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
+
+  if (combo >= 3) {
+    SFX.combo(combo);
+    showComboText(`${combo}コンボ🔥`);
+  }
+
+  setTimeout(() => item.remove(), 400);
+
+  updateUI();
+
+  if (gauge >= 100) {
+    gameOver(true);
+  }
+}
+
+// ===== STOP =====
+function stopEating() {
+  if (!gameActive) return;
+  gameActive = false;
+  clearAllTimers();
+  SFX.stop();
+
+  // Bonus for stopping near target
+  const targetPct = 80;
+  const diff = Math.abs(gauge - targetPct);
+  let bonus = 0;
+  let msg = '';
+
+  if (gauge >= 95) {
+    msg = '危なかった！ギリギリすぎ😰';
+    bonus = 300;
+  } else if (diff <= 3) {
+    msg = '神業ストップ！🏆 完璧！';
+    bonus = 2000;
+  } else if (diff <= 8) {
+    msg = 'ナイスストップ！😄';
+    bonus = 1000;
+  } else if (diff <= 15) {
+    msg = 'まあまあかな！👍';
+    bonus = 400;
+  } else if (gauge < 40) {
+    msg = 'もっと食べられたのに…😅';
+    bonus = 0;
+  } else {
+    msg = 'いい判断！👌';
+    bonus = 200;
+  }
+
+  score += bonus;
+  showResult(false, msg, bonus);
+}
+
+// ===== GAME OVER =====
+function gameOver(burst) {
+  gameActive = false;
+  clearAllTimers();
+  if (burst) {
+    gauge = 100;
+    updateUI();
+    SFX.explosion();
+    setTimeout(() => showResult(true, '食べすぎ爆発！💥', 0), 600);
+  }
+}
+
+// ===== RESULT =====
+function showResult(burst, msg, bonus) {
+  const titleEl = document.getElementById('resultTitle');
+  const emojiEl = document.getElementById('resultEmoji');
+  const msgEl = document.getElementById('resultMsg');
+
+  if (burst) {
+    titleEl.textContent = '💥 食べすぎ！爆発！';
+    titleEl.className = 'result-title over';
+    emojiEl.textContent = '🤯';
+  } else if (gauge >= 75 && gauge <= 90) {
+    titleEl.textContent = '🏆 パーフェクト！';
+    titleEl.className = 'result-title great';
+    emojiEl.textContent = '🌟';
+    SFX.victory();
+  } else if (gauge >= 60) {
+    titleEl.textContent = '👍 グッドストップ！';
+    titleEl.className = 'result-title good';
+    emojiEl.textContent = '😄';
+    SFX.victory();
+  } else {
+    titleEl.textContent = '😶 もう少し食べよう？';
+    titleEl.className = 'result-title';
+    emojiEl.textContent = '🥢';
+  }
+
+  document.getElementById('finalScore').textContent = score.toLocaleString();
+  document.getElementById('finalGauge').textContent = Math.round(gauge) + '%';
+  document.getElementById('finalLevel').textContent = level;
+  document.getElementById('finalCombo').textContent = maxCombo;
+  msgEl.textContent = msg + (bonus > 0 ? ` (ボーナス +${bonus.toLocaleString()}点)` : '');
+
+  showScreen('result-screen');
+}
+
+// ===== UPDATE UI =====
+function updateUI() {
+  const g = Math.min(100, Math.round(gauge));
+  document.getElementById('gaugeFill').style.width = g + '%';
+  document.getElementById('gaugePercent').textContent = g + '%';
+
+  const fill = document.getElementById('gaugeFill');
+  const stomachEl = document.getElementById('stomachEmoji');
+  const msgEl = document.getElementById('stomachMsg');
+
+  fill.className = 'gauge-fill';
+  const prevG = parseInt(document.getElementById('gaugePercent').textContent) || 0;
+  if (g < 50) {
+    fill.classList.add('safe');
+    stomachEl.textContent = '😊';
+    msgEl.textContent = 'お腹すいた！どんどん食べよう！';
+  } else if (g < 75) {
+    fill.classList.add('warn');
+    stomachEl.textContent = '😋';
+    msgEl.textContent = 'いい感じ！まだ食べられる！';
+  } else if (g < 90) {
+    fill.classList.add('danger');
+    stomachEl.textContent = '😅';
+    msgEl.textContent = '危険ゾーン！もうすぐ限界！';
+    if (prevG < 75) SFX.warning();
+  } else {
+    fill.classList.add('full');
+    stomachEl.textContent = '🤢';
+    msgEl.textContent = '爆発寸前！早くストップ！！';
+    if (prevG < 90) SFX.alarm();
+  }
+
+  // Animate stomach
+  stomachEl.classList.remove('eat');
+  void stomachEl.offsetWidth;
+  stomachEl.classList.add('eat');
+
+  document.getElementById('scoreDisplay').textContent = score.toLocaleString();
+  document.getElementById('comboCount').textContent = combo;
+  document.getElementById('levelDisplay').textContent = level;
+}
+
+function updateTimerBar() {
+  const pct = (levelTimeLeft / levelDuration) * 100;
+  const bar = document.getElementById('timerBar');
+  bar.style.width = Math.max(0, pct) + '%';
+  if (pct < 30) bar.style.background = 'linear-gradient(90deg, #b71c1c, #ff1744)';
+  else bar.style.background = 'linear-gradient(90deg, #ff8c00, #ffd700)';
+}
+
+// ===== COMBO FLASH =====
+let comboHideTimer = null;
+function showComboText(txt) {
+  const el = document.getElementById('comboDisplay');
+  el.textContent = txt;
+  el.classList.add('show');
+  if (comboHideTimer) clearTimeout(comboHideTimer);
+  comboHideTimer = setTimeout(() => {
+    el.classList.remove('show');
+  }, 1200);
+}
+</script>
+
+</body>
+</html>

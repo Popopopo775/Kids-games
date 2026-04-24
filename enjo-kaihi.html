@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔥 炎上回避ゲーム</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
+
+:root {
+–fire1: #ff2200;
+–fire2: #ff6600;
+–fire3: #ffaa00;
+–fire4: #ffdd00;
+–safe: #00e5a0;
+–bg: #0a0a0f;
+–card: #14141e;
+–card2: #1e1e2e;
+–text: #f0eaff;
+–muted: #888;
+}
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+font-family: ‘Zen Maru Gothic’, sans-serif;
+background: var(–bg);
+color: var(–text);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+overflow-x: hidden;
+position: relative;
+}
+
+/* 背景の炎エフェクト */
+.bg-fire {
+position: fixed;
+inset: 0;
+pointer-events: none;
+z-index: 0;
+overflow: hidden;
+}
+
+.flame-bg {
+position: absolute;
+bottom: -20px;
+width: 80px;
+animation: flameRise linear infinite;
+opacity: 0;
+font-size: 3rem;
+filter: blur(1px);
+}
+
+@keyframes flameRise {
+0% { transform: translateY(0) scale(1) rotate(-5deg); opacity: 0; }
+10% { opacity: 0.4; }
+50% { transform: translateY(-40vh) scale(1.3) rotate(5deg); opacity: 0.3; }
+90% { opacity: 0.1; }
+100% { transform: translateY(-90vh) scale(0.8) rotate(-3deg); opacity: 0; }
+}
+
+/* メインコンテナ */
+#app {
+position: relative;
+z-index: 10;
+width: 100%;
+max-width: 560px;
+padding: 16px;
+}
+
+/* ヘッダー */
+.header {
+text-align: center;
+margin-bottom: 20px;
+}
+
+.logo {
+font-size: 2.2rem;
+font-weight: 900;
+background: linear-gradient(135deg, var(–fire2), var(–fire3), var(–fire4));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+line-height: 1.2;
+letter-spacing: -1px;
+text-shadow: none;
+filter: drop-shadow(0 0 20px rgba(255,100,0,0.5));
+}
+
+.subtitle {
+font-size: 0.8rem;
+color: var(–muted);
+margin-top: 4px;
+letter-spacing: 2px;
+}
+
+/* 炎ゲージ */
+.gauge-wrapper {
+background: var(–card);
+border-radius: 16px;
+padding: 16px 20px;
+margin-bottom: 16px;
+border: 1px solid #2a2a3a;
+box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+.gauge-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 10px;
+}
+
+.gauge-label {
+font-size: 0.85rem;
+font-weight: 700;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.gauge-pct {
+font-size: 1.4rem;
+font-weight: 900;
+color: var(–fire2);
+transition: color 0.3s;
+}
+
+.gauge-track {
+height: 24px;
+background: #222230;
+border-radius: 12px;
+overflow: hidden;
+position: relative;
+}
+
+.gauge-fill {
+height: 100%;
+border-radius: 12px;
+transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1), background 0.4s;
+position: relative;
+overflow: hidden;
+}
+
+.gauge-fill::after {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+0% { transform: translateX(-100%); }
+100% { transform: translateX(100%); }
+}
+
+.gauge-emojis {
+display: flex;
+justify-content: flex-end;
+margin-top: 6px;
+font-size: 1.1rem;
+min-height: 24px;
+gap: 2px;
+}
+
+/* スコア & ステージ */
+.stats-row {
+display: flex;
+gap: 10px;
+margin-bottom: 16px;
+}
+
+.stat-box {
+flex: 1;
+background: var(–card);
+border-radius: 12px;
+padding: 12px;
+text-align: center;
+border: 1px solid #2a2a3a;
+}
+
+.stat-label {
+font-size: 0.7rem;
+color: var(–muted);
+letter-spacing: 1px;
+margin-bottom: 4px;
+}
+
+.stat-value {
+font-size: 1.5rem;
+font-weight: 900;
+}
+
+/* シナリオカード */
+.scenario-card {
+background: var(–card2);
+border-radius: 20px;
+padding: 24px;
+margin-bottom: 16px;
+border: 1px solid #2a2a3a;
+box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+position: relative;
+overflow: hidden;
+}
+
+.scenario-card::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 3px;
+background: linear-gradient(90deg, var(–fire1), var(–fire3), var(–fire4));
+}
+
+.scenario-icon {
+font-size: 2.5rem;
+text-align: center;
+margin-bottom: 12px;
+display: block;
+animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-6px); }
+}
+
+.scenario-situation {
+font-size: 0.7rem;
+color: var(–fire3);
+letter-spacing: 2px;
+font-weight: 700;
+margin-bottom: 8px;
+}
+
+.scenario-text {
+font-size: 1rem;
+line-height: 1.7;
+color: var(–text);
+font-weight: 700;
+}
+
+/* 選択肢 */
+.choices {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-bottom: 16px;
+}
+
+.choice-btn {
+background: var(–card);
+border: 2px solid #2a2a3a;
+border-radius: 14px;
+padding: 16px 20px;
+color: var(–text);
+font-family: inherit;
+font-size: 0.95rem;
+font-weight: 700;
+cursor: pointer;
+text-align: left;
+transition: all 0.2s;
+display: flex;
+align-items: center;
+gap: 12px;
+line-height: 1.5;
+position: relative;
+overflow: hidden;
+}
+
+.choice-btn::before {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, transparent, rgba(255,255,255,0.03));
+opacity: 0;
+transition: opacity 0.2s;
+}
+
+.choice-btn:hover:not(:disabled) {
+border-color: var(–fire3);
+transform: translateY(-2px);
+box-shadow: 0 8px 24px rgba(255,150,0,0.2);
+}
+
+.choice-btn:hover:not(:disabled)::before { opacity: 1; }
+.choice-btn:active:not(:disabled) { transform: translateY(0); }
+
+.choice-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+.choice-label {
+width: 28px;
+height: 28px;
+border-radius: 8px;
+background: #2a2a3a;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.8rem;
+flex-shrink: 0;
+font-weight: 900;
+}
+
+.choice-btn.correct {
+border-color: var(–safe);
+background: rgba(0, 229, 160, 0.1);
+animation: correctPulse 0.5s ease;
+}
+
+.choice-btn.wrong {
+border-color: var(–fire1);
+background: rgba(255, 34, 0, 0.1);
+animation: wrongShake 0.5s ease;
+}
+
+@keyframes correctPulse {
+0% { transform: scale(1); }
+50% { transform: scale(1.03); }
+100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+0%, 100% { transform: translateX(0); }
+20% { transform: translateX(-8px); }
+40% { transform: translateX(8px); }
+60% { transform: translateX(-6px); }
+80% { transform: translateX(6px); }
+}
+
+/* フィードバック */
+.feedback {
+border-radius: 14px;
+padding: 16px 20px;
+margin-bottom: 16px;
+font-size: 0.95rem;
+font-weight: 700;
+line-height: 1.6;
+display: none;
+animation: fadeSlideIn 0.3s ease;
+}
+
+.feedback.show { display: block; }
+
+.feedback.correct {
+background: rgba(0,229,160,0.1);
+border: 1px solid var(–safe);
+color: #7fffcf;
+}
+
+.feedback.wrong {
+background: rgba(255,60,0,0.1);
+border: 1px solid var(–fire1);
+color: #ffaa77;
+}
+
+@keyframes fadeSlideIn {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* 次へボタン */
+.next-btn {
+width: 100%;
+padding: 16px;
+background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
+border: 2px solid #4a4a5a;
+border-radius: 14px;
+color: var(–text);
+font-family: inherit;
+font-size: 1rem;
+font-weight: 900;
+cursor: pointer;
+letter-spacing: 1px;
+transition: all 0.2s;
+display: none;
+}
+
+.next-btn.show { display: block; }
+.next-btn:hover { background: linear-gradient(135deg, #3a3a5a, #4a4a6a); transform: translateY(-2px); }
+
+/* ゲームオーバー画面 */
+.overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.92);
+z-index: 100;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 24px;
+display: none;
+}
+
+.overlay.show { display: flex; animation: fadeIn 0.4s ease; }
+
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+.overlay-card {
+background: var(–card2);
+border-radius: 24px;
+padding: 36px 28px;
+text-align: center;
+max-width: 400px;
+width: 100%;
+border: 2px solid;
+box-shadow: 0 24px 64px rgba(0,0,0,0.8);
+}
+
+.overlay-card.fail { border-color: var(–fire1); box-shadow: 0 0 60px rgba(255,30,0,0.3); }
+.overlay-card.clear { border-color: var(–safe); box-shadow: 0 0 60px rgba(0,229,160,0.3); }
+
+.overlay-emoji { font-size: 4rem; margin-bottom: 16px; animation: bigBounce 1s ease infinite; }
+
+@keyframes bigBounce {
+0%, 100% { transform: scale(1) rotate(-3deg); }
+50% { transform: scale(1.1) rotate(3deg); }
+}
+
+.overlay-title {
+font-size: 2rem;
+font-weight: 900;
+margin-bottom: 8px;
+}
+
+.overlay-title.fail { color: var(–fire1); text-shadow: 0 0 20px rgba(255,30,0,0.5); }
+.overlay-title.clear { color: var(–safe); text-shadow: 0 0 20px rgba(0,229,160,0.5); }
+
+.overlay-msg { font-size: 0.95rem; color: var(–muted); margin-bottom: 8px; line-height: 1.7; }
+.overlay-score { font-size: 2.5rem; font-weight: 900; margin: 16px 0; }
+
+.restart-btn {
+width: 100%;
+padding: 16px;
+background: linear-gradient(135deg, var(–fire2), var(–fire1));
+border: none;
+border-radius: 14px;
+color: white;
+font-family: inherit;
+font-size: 1.1rem;
+font-weight: 900;
+cursor: pointer;
+margin-top: 16px;
+letter-spacing: 1px;
+transition: all 0.2s;
+}
+
+.restart-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,100,0,0.4); }
+
+/* スタート画面 */
+#startScreen {
+text-align: center;
+padding: 20px;
+}
+
+#startScreen .big-emoji {
+font-size: 5rem;
+display: block;
+margin-bottom: 16px;
+animation: fireAnim 1s ease-in-out infinite alternate;
+}
+
+@keyframes fireAnim {
+from { transform: scale(1) rotate(-2deg); filter: drop-shadow(0 0 10px orange); }
+to { transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 24px red); }
+}
+
+#startScreen h1 {
+font-size: 2rem;
+font-weight: 900;
+background: linear-gradient(135deg, var(–fire2), var(–fire4));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+margin-bottom: 12px;
+}
+
+#startScreen p {
+color: var(–muted);
+font-size: 0.9rem;
+line-height: 1.8;
+margin-bottom: 24px;
+}
+
+.start-btn {
+padding: 18px 40px;
+background: linear-gradient(135deg, var(–fire1), var(–fire3));
+border: none;
+border-radius: 50px;
+color: white;
+font-family: inherit;
+font-size: 1.2rem;
+font-weight: 900;
+cursor: pointer;
+letter-spacing: 2px;
+transition: all 0.2s;
+box-shadow: 0 8px 32px rgba(255,100,0,0.4);
+}
+
+.start-btn:hover { transform: scale(1.05); box-shadow: 0 12px 40px rgba(255,100,0,0.6); }
+
+/* 炎上演出 */
+.fire-particle {
+position: fixed;
+pointer-events: none;
+z-index: 200;
+font-size: 2rem;
+animation: fireParticle 1.5s ease-out forwards;
+}
+
+@keyframes fireParticle {
+0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+100% { transform: translateY(-150px) scale(2) rotate(180deg); opacity: 0; }
+}
+
+/* progress dots */
+.progress-dots {
+display: flex;
+justify-content: center;
+gap: 6px;
+margin-bottom: 16px;
+}
+
+.dot {
+width: 8px; height: 8px;
+border-radius: 50%;
+background: #2a2a3a;
+transition: all 0.3s;
+border: 1px solid #3a3a4a;
+}
+
+.dot.done { background: var(–safe); border-color: var(–safe); }
+.dot.wrong { background: var(–fire1); border-color: var(–fire1); }
+.dot.current { background: var(–fire3); border-color: var(–fire3); width: 16px; border-radius: 4px; }
+</style>
+
+</head>
+<body>
+
+<!-- 背景の炎 -->
+
+<div class="bg-fire" id="bgFire"></div>
+
+<!-- スタート画面 -->
+
+<div id="startScreen">
+  <span class="big-emoji">🔥</span>
+  <h1>炎上回避ゲーム！</h1>
+  <p>
+    SNSで炎上しないように<br>
+    選択肢を慎重に選べ！<br>
+    間違えると<strong style="color:var(--fire2)">炎ゲージ</strong>が上がって…<br>
+    MAX になったら🔥<strong style="color:var(--fire1)">大炎上！</strong>🔥
+  </p>
+  <button class="start-btn" onclick="startGame()">▶ ゲームスタート</button>
+</div>
+
+<!-- ゲーム本体 -->
+
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="logo">🔥 炎上回避ゲーム</div>
+    <div class="subtitle">SNS炎上シミュレーター</div>
+  </div>
+
+  <!-- 進捗ドット -->
+
+  <div class="progress-dots" id="progressDots"></div>
+
+  <!-- 炎ゲージ -->
+
+  <div class="gauge-wrapper">
+    <div class="gauge-header">
+      <div class="gauge-label">🔥 炎ゲージ</div>
+      <div class="gauge-pct" id="gaugePct">0%</div>
+    </div>
+    <div class="gauge-track">
+      <div class="gauge-fill" id="gaugeFill" style="width:0%"></div>
+    </div>
+    <div class="gauge-emojis" id="gaugeEmojis"></div>
+  </div>
+
+  <!-- スタッツ -->
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-label">STAGE</div>
+      <div class="stat-value" id="stageVal">1</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">SCORE</div>
+      <div class="stat-value" id="scoreVal" style="color:var(--fire3)">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">残り問題</div>
+      <div class="stat-value" id="remainVal">-</div>
+    </div>
+  </div>
+
+  <!-- シナリオ -->
+
+  <div class="scenario-card">
+    <span class="scenario-icon" id="scenarioIcon">📱</span>
+    <div class="scenario-situation" id="scenarioSit">SITUATION</div>
+    <div class="scenario-text" id="scenarioText">読み込み中...</div>
+  </div>
+
+  <!-- 選択肢 -->
+
+  <div class="choices" id="choices"></div>
+
+  <!-- フィードバック -->
+
+  <div class="feedback" id="feedback"></div>
+
+  <!-- 次へ -->
+
+<button class="next-btn" id="nextBtn" onclick="nextQuestion()">次の問題へ →</button>
+
+</div>
+
+<!-- ゲームオーバー / クリア -->
+
+<div class="overlay" id="overlay">
+  <div class="overlay-card" id="overlayCard">
+    <div class="overlay-emoji" id="overlayEmoji"></div>
+    <div class="overlay-title" id="overlayTitle"></div>
+    <div class="overlay-msg" id="overlayMsg"></div>
+    <div class="overlay-score" id="overlayScore"></div>
+    <button class="restart-btn" onclick="restartGame()">🔄 もう一度遊ぶ</button>
+  </div>
+</div>
+
+<script>
+// ========== 音声 ==========
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+function playTone(freq, type, duration, vol = 0.3, delay = 0) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration);
+  } catch(e) {}
+}
+
+function playCrackle(vol = 0.15) {
+  try {
+    const ctx = getAudioCtx();
+    const bufLen = ctx.sampleRate * 0.3;
+    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+    }
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 800;
+    filter.Q.value = 0.5;
+    src.buffer = buf;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.value = vol;
+    src.start();
+  } catch(e) {}
+}
+
+function soundCorrect() {
+  playTone(523, 'sine', 0.1, 0.2);
+  playTone(659, 'sine', 0.1, 0.2, 0.1);
+  playTone(784, 'sine', 0.2, 0.25, 0.2);
+}
+
+function soundWrong() {
+  playTone(300, 'sawtooth', 0.05, 0.2);
+  playTone(200, 'sawtooth', 0.1, 0.25, 0.08);
+  playCrackle(0.2);
+}
+
+function soundGameOver() {
+  playCrackle(0.4);
+  for (let i = 0; i < 6; i++) {
+    playTone(200 - i*15, 'sawtooth', 0.15, 0.3, i * 0.08);
+    playCrackle(0.3);
+  }
+}
+
+function soundClear() {
+  [523, 659, 784, 1047].forEach((f, i) => {
+    playTone(f, 'sine', 0.2, 0.2, i * 0.12);
+  });
+  playTone(1319, 'sine', 0.4, 0.3, 0.55);
+}
+
+function soundGaugeUp() {
+  playTone(180, 'square', 0.08, 0.15);
+  playCrackle(0.1);
+}
+
+function soundStart() {
+  [300, 400, 500].forEach((f, i) => {
+    playTone(f, 'sine', 0.1, 0.2, i * 0.06);
+  });
+}
+
+// ========== 問題データ ==========
+const allQuestions = [
+  {
+    icon: "🍽️",
+    situation: "グルメ投稿",
+    text: "レストランで頼んだ料理が少し冷めていた。SNSに投稿するなら？",
+    choices: [
+      { text: "「少し冷めていたけど、味はとても美味しかった！次回はできたてで食べたい🍜」", correct: true },
+      { text: "「このレストラン最悪！料理が冷めてて金返せ！二度と来ない！店名：◯◯◯」", correct: false },
+      { text: "「ちょっと残念だったけど、スタッフさんは丁寧で雰囲気は良かった」", correct: true },
+      { text: "「こんな料理出すな！みんな行かないで！食中毒になりそう（嘘）」", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！建設的な表現でポジティブな面も伝えられました。炎上回避成功！",
+      wrong: "❌ 不正解！誇張・虚偽・個人攻撃はアウト！炎上の典型パターンです🔥"
+    },
+    correctIdx: [0, 2]
+  },
+  {
+    icon: "🎮",
+    situation: "ゲーム実況",
+    text: "人気ゲームの実況動画で、有名配信者の真似をしたら「パクリ」と言われた。返信するなら？",
+    choices: [
+      { text: "「影響を受けた配信者さんへの敬意を込めてやっています。不快にさせてしまってすみません」", correct: true },
+      { text: "「パクリとか言う奴はファンじゃない！出て行け！」", correct: false },
+      { text: "黙ってコメントを削除して、そっと配信スタイルを見直す", correct: true },
+      { text: "「じゃあお前がやれよ！どうせニワカだろ？」と反撃", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！落ち着いて対処できました。火に油を注がないのが大事！",
+      wrong: "❌ 不正解！感情的な反論はさらなる炎上を呼びます。冷静さが命です🔥"
+    },
+    correctIdx: [0, 2]
+  },
+  {
+    icon: "🏢",
+    situation: "会社員の投稿",
+    text: "残業が多くて辛い。このストレスをSNSでどう発散する？",
+    choices: [
+      { text: "「最近忙しい日が続いてる…でも頑張ってる自分えらい！🌙」", correct: true },
+      { text: "「うちの会社（◯◯株式会社）はブラック企業！社長は◯◯！みんな応募しないで！」", correct: false },
+      { text: "「仕事大変だけど、美味しいもの食べて乗り切る✊ #飯テロ」", correct: true },
+      { text: "「同僚の△△さん（実名）が使えなくて全部自分に押し付けられてる」", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！感情を発散しつつも、個人・会社情報を特定しないのがポイント！",
+      wrong: "❌ 不正解！実名・会社名の公開は名誉毀損になる可能性も！大炎上コースです🔥"
+    },
+    correctIdx: [0, 2]
+  },
+  {
+    icon: "🎵",
+    situation: "音楽について",
+    text: "好きなアーティストが楽曲盗作疑惑で話題に。コメントするなら？",
+    choices: [
+      { text: "「疑惑があるみたいだけど、本人の説明を待ちたいな」", correct: true },
+      { text: "「確実に盗作！このアーティストを潰す！拡散希望！」", correct: false },
+      { text: "「音楽って似てしまうこともあるし、詳しい人の見解が気になる」", correct: true },
+      { text: "「盗作野郎！コンサート中止にしろ！返金しろ！」", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！事実確認前の断定は危険。慎重な姿勢が炎上を防ぎます！",
+      wrong: "❌ 不正例！確認前の断定拡散はデマ拡散＆名誉毀損になりうる危険行為！🔥"
+    },
+    correctIdx: [0, 2]
+  },
+  {
+    icon: "🐈",
+    situation: "ペット投稿",
+    text: "隣人が犬をよく吠えさせる。迷惑だけどどうSNSに書く？",
+    choices: [
+      { text: "「近所の犬の鳴き声で眠れない夜…猫派の私には辛い😢 #睡眠大事」", correct: true },
+      { text: "「◯丁目△番地の家の犬がうるさい！飼い主は◯◯さん！」", correct: false },
+      { text: "「防音イヤーマフ買ってみた。生活の知恵って大事だね！」", correct: true },
+      { text: "「この犬と飼い主の写真です。みんなで苦情を言ってください」", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！個人を特定する情報を出さずに感情を表現できました！",
+      wrong: "❌ 不正解！住所・氏名・写真の公開はプライバシー侵害＆ネット私刑！即炎上です🔥"
+    },
+    correctIdx: [0, 2]
+  },
+  {
+    icon: "⚽",
+    situation: "スポーツ観戦",
+    text: "推しのサッカー選手が大きなミスをして試合に負けた。SNSへの書き込みは？",
+    choices: [
+      { text: "「悔しいけど、選手のみんなは精一杯戦ってくれた。次こそ！💙」", correct: true },
+      { text: "「◯◯選手のせいで負けた！年俸返せ！クビにしろ！」", correct: false },
+      { text: "「今日は辛い結果だったけど、また応援し続けるよ。頑張れ！」", correct: true },
+      { text: "「◯◯選手の自宅はどこ？直接抗議しに行く」", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！選手も人間。批判ではなく応援で気持ちを表現できました！",
+      wrong: "❌ 不正解！金銭要求や個人特定は脅迫・ストーカー行為に！完全アウト🔥"
+    },
+    correctIdx: [0, 2]
+  },
+  {
+    icon: "🛍️",
+    situation: "ショッピングトラブル",
+    text: "ネット通販で届いた商品が説明と違った。SNSでの対応は？",
+    choices: [
+      { text: "「商品説明と違ったので問い合わせ中。ショッピングは慎重に📦」", correct: true },
+      { text: "「【詐欺確定】◯◯ショップは絶対買うな！全員報告して！」", correct: false },
+      { text: "「まずカスタマーサポートに連絡してみる。早く解決するといいな」", correct: true },
+      { text: "「社長の名前は◯◯！住所は◯◯！みんなで凸しよう！」", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！まず正規の手順で解決を試みる姿勢が大切です！",
+      wrong: "❌ 不正解！確認前の「詐欺確定」や個人情報拡散は名誉毀損＆威力業務妨害！🔥"
+    },
+    correctIdx: [0, 2]
+  },
+  {
+    icon: "🎓",
+    situation: "学校・勉強",
+    text: "クラスメイトがずるをして良い点を取った（と思う）。どうする？",
+    choices: [
+      { text: "「勉強方法を見直してみた。コツコツが一番かもね💪」", correct: true },
+      { text: "「◯◯（実名）がカンニングしてた！証拠写真あり！拡散して！」", correct: false },
+      { text: "「テスト結果が微妙で凹む…でも自分のペースで頑張る！」", correct: true },
+      { text: "「不正してる奴がいるから、そいつのLINEグループに晒す」", correct: false }
+    ],
+    feedback: {
+      correct: "✅ 正解！人を攻撃せずに自分の感情と向き合えました！",
+      wrong: "❌ 不正解！確認できない事実を拡散するのは名誉毀損。いじめの原因にも！🔥"
+    },
+    correctIdx: [0, 2]
+  }
+];
+
+// ========== ゲーム状態 ==========
+let questions = [];
+let currentQ = 0;
+let fireGauge = 0;
+let score = 0;
+let answered = false;
+let results = []; // 'correct' or 'wrong' per question
+
+const FIRE_PER_WRONG = 35;
+const SCORE_PER_CORRECT = 150;
+const BONUS_NO_FIRE = 300;
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  soundStart();
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  
+  questions = shuffleArray(allQuestions).slice(0, 6);
+  currentQ = 0;
+  fireGauge = 0;
+  score = 0;
+  results = [];
+  answered = false;
+
+  spawnBgFlames();
+  updateGauge();
+  renderProgressDots();
+  loadQuestion();
+}
+
+function restartGame() {
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('startScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function spawnBgFlames() {
+  const container = document.getElementById('bgFire');
+  container.innerHTML = '';
+  const emojis = ['🔥', '💥', '🌋', '🔥', '🔥', '🔥', '💨'];
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement('span');
+    el.className = 'flame-bg';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = (Math.random() * 95) + '%';
+    el.style.animationDuration = (6 + Math.random() * 8) + 's';
+    el.style.animationDelay = (Math.random() * 8) + 's';
+    el.style.fontSize = (1.5 + Math.random() * 2.5) + 'rem';
+    container.appendChild(el);
+  }
+}
+
+function renderProgressDots() {
+  const container = document.getElementById('progressDots');
+  container.innerHTML = '';
+  questions.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    if (i < currentQ) {
+      dot.classList.add(results[i] === 'correct' ? 'done' : 'wrong');
+    } else if (i === currentQ) {
+      dot.classList.add('current');
+    }
+    container.appendChild(dot);
+  });
+}
+
+function getGaugeColor(pct) {
+  if (pct < 30) return `linear-gradient(90deg, #00e5a0, #00cc80)`;
+  if (pct < 60) return `linear-gradient(90deg, #ffaa00, #ff6600)`;
+  return `linear-gradient(90deg, #ff4400, #ff0000)`;
+}
+
+function updateGauge() {
+  const fill = document.getElementById('gaugeFill');
+  const pct = document.getElementById('gaugePct');
+  const emojis = document.getElementById('gaugeEmojis');
+
+  const p = Math.min(fireGauge, 100);
+  fill.style.width = p + '%';
+  fill.style.background = getGaugeColor(p);
+  pct.textContent = Math.round(p) + '%';
+
+  if (p >= 80) pct.style.color = 'var(--fire1)';
+  else if (p >= 50) pct.style.color = 'var(--fire2)';
+  else pct.style.color = 'var(--safe)';
+
+  const fireCount = Math.floor(p / 20);
+  emojis.textContent = '🔥'.repeat(fireCount);
+
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('stageVal').textContent = currentQ + 1;
+  document.getElementById('remainVal').textContent = questions.length - currentQ;
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+
+  document.getElementById('scenarioIcon').textContent = q.icon;
+  document.getElementById('scenarioSit').textContent = q.situation;
+  document.getElementById('scenarioText').textContent = q.text;
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  renderProgressDots();
+  updateGauge();
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+
+  const labels = ['Ａ', 'Ｂ', 'Ｃ', 'Ｄ'];
+  const shuffled = shuffleArray(q.choices.map((c, i) => ({ ...c, origIdx: i })));
+
+  shuffled.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-label">${labels[i]}</span><span>${choice.text}</span>`;
+    btn.onclick = () => selectAnswer(btn, choice.correct, q.feedback, shuffled);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn, isCorrect, feedback, allChoices) {
+  if (answered) return;
+  answered = true;
+
+  const allBtns = document.querySelectorAll('.choice-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  // 正解・不正解を表示
+  allChoices.forEach((choice, i) => {
+    if (choice.correct) allBtns[i].classList.add('correct');
+  });
+
+  const feedbackEl = document.getElementById('feedback');
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    soundCorrect();
+    score += SCORE_PER_CORRECT;
+    results.push('correct');
+    feedbackEl.className = 'feedback correct show';
+    feedbackEl.textContent = feedback.correct;
+    spawnParticles('✅', btn);
+  } else {
+    btn.classList.add('wrong');
+    soundWrong();
+    fireGauge += FIRE_PER_WRONG;
+    results.push('wrong');
+    feedbackEl.className = 'feedback wrong show';
+    feedbackEl.textContent = feedback.wrong;
+    spawnParticles('🔥', btn);
+    soundGaugeUp();
+  }
+
+  updateGauge();
+
+  if (fireGauge >= 100) {
+    setTimeout(() => gameOver(), 1200);
+  } else if (currentQ >= questions.length - 1) {
+    setTimeout(() => gameClear(), 1200);
+  } else {
+    document.getElementById('nextBtn').className = 'next-btn show';
+  }
+}
+
+function nextQuestion() {
+  currentQ++;
+  loadQuestion();
+}
+
+function spawnParticles(emoji, refEl) {
+  const rect = refEl ? refEl.getBoundingClientRect() : { left: window.innerWidth/2, top: window.innerHeight/2 };
+  for (let i = 0; i < 5; i++) {
+    const p = document.createElement('span');
+    p.className = 'fire-particle';
+    p.textContent = emoji;
+    p.style.left = (rect.left + Math.random() * rect.width) + 'px';
+    p.style.top = (rect.top + Math.random() * 30) + 'px';
+    p.style.animationDelay = (Math.random() * 0.3) + 's';
+    p.style.fontSize = (1.5 + Math.random()) + 'rem';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 2000);
+  }
+}
+
+function gameOver() {
+  soundGameOver();
+  const overlay = document.getElementById('overlay');
+  const card = document.getElementById('overlayCard');
+  card.className = 'overlay-card fail';
+  document.getElementById('overlayEmoji').textContent = '🔥💀🔥';
+  document.getElementById('overlayTitle').className = 'overlay-title fail';
+  document.getElementById('overlayTitle').textContent = '大炎上！！！';
+  document.getElementById('overlayMsg').textContent =
+    `SNSが燃え上がりました…😱\n全${questions.length}問中 ${results.filter(r=>r==='correct').length}問正解`;
+  document.getElementById('overlayScore').textContent = `スコア: ${score}pt`;
+  overlay.classList.add('show');
+
+  // 画面を揺らす
+  document.body.style.animation = 'none';
+  setTimeout(() => {
+    document.body.style.animation = '';
+  }, 10);
+
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const p = document.createElement('span');
+      p.className = 'fire-particle';
+      p.textContent = '🔥';
+      p.style.left = Math.random() * window.innerWidth + 'px';
+      p.style.top = Math.random() * window.innerHeight + 'px';
+      p.style.fontSize = (2 + Math.random() * 2) + 'rem';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2000);
+    }, i * 80);
+  }
+}
+
+function gameClear() {
+  const noFireBonus = fireGauge === 0 ? BONUS_NO_FIRE : 0;
+  score += noFireBonus;
+  soundClear();
+
+  const overlay = document.getElementById('overlay');
+  const card = document.getElementById('overlayCard');
+  const correctCount = results.filter(r => r === 'correct').length;
+
+  if (correctCount === questions.length) {
+    card.className = 'overlay-card clear';
+    document.getElementById('overlayEmoji').textContent = '🏆✨🎉';
+    document.getElementById('overlayTitle').className = 'overlay-title clear';
+    document.getElementById('overlayTitle').textContent = '完全回避！';
+    document.getElementById('overlayMsg').textContent =
+      `全問正解！SNS達人認定！🎖️\n炎上ゼロで乗り切りました！` + (noFireBonus ? `\n🎁 炎上ゼロボーナス +${BONUS_NO_FIRE}pt！` : '');
+  } else {
+    card.className = 'overlay-card clear';
+    document.getElementById('overlayEmoji').textContent = '😮‍💨🌊';
+    document.getElementById('overlayTitle').className = 'overlay-title clear';
+    document.getElementById('overlayTitle').textContent = 'なんとか回避！';
+    document.getElementById('overlayMsg').textContent =
+      `${questions.length}問中 ${correctCount}問正解！\nヒヤヒヤしたけど炎上は免れた！`;
+  }
+
+  document.getElementById('overlayScore').textContent = `スコア: ${score}pt`;
+  overlay.classList.add('show');
+
+  for (let i = 0; i < 12; i++) {
+    setTimeout(() => {
+      const stars = ['✨','⭐','🌟','💫'];
+      const p = document.createElement('span');
+      p.className = 'fire-particle';
+      p.textContent = stars[Math.floor(Math.random() * stars.length)];
+      p.style.left = Math.random() * window.innerWidth + 'px';
+      p.style.top = Math.random() * window.innerHeight + 'px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2000);
+    }, i * 100);
+  }
+}
+</script>
+
+</body>
+</html>
