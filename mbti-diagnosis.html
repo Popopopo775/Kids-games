@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <style>
   :root{
     --bg:#13151d;
@@ -148,6 +149,50 @@
     transition:border-color .15s ease, background .15s ease;
   }
   .btn-retry:hover{ border-color:var(--text-dim); background:var(--surface); }
+
+  /* ---------- EMBLEM ---------- */
+  .emblem{ width:108px; height:108px; margin:0 auto 10px; }
+  .emblem svg{ width:100%; height:100%; display:block; }
+
+  /* ---------- SHARE ---------- */
+  .share-actions{ display:flex; gap:10px; margin:6px 0 8px; }
+  .btn-share{
+    flex:1; background:linear-gradient(135deg, var(--accent-sn), var(--accent-tf));
+    color:#0d0f14; border:none; font-weight:700; font-size:14.5px;
+    padding:15px; border-radius:999px; cursor:pointer; transition:transform .15s ease, opacity .15s ease;
+  }
+  .btn-share:hover{ transform:translateY(-2px); }
+  .btn-share:disabled{ opacity:0.55; cursor:default; transform:none; }
+  .btn-copy{
+    flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--text-dim);
+    font-size:13px; padding:15px 18px; border-radius:999px; cursor:pointer; transition:border-color .15s ease, color .15s ease;
+  }
+  .btn-copy:hover{ border-color:var(--text-dim); color:var(--text); }
+  .share-status{ text-align:center; font-size:12.5px; color:var(--text-dim); min-height:18px; margin:0 0 18px; }
+
+  /* off-screen render target for the shareable image (captured by html2canvas) */
+  .share-card-wrap{ position:fixed; left:-10000px; top:0; pointer-events:none; }
+  .share-card{
+    width:680px; padding:56px 50px 46px; text-align:center; border-radius:28px; color:#f3efe6;
+    font-family:'Zen Maru Gothic',sans-serif;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(167,139,250,0.22), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 110%, rgba(79,209,197,0.16), transparent 60%),
+      #13151d;
+  }
+  .share-card .sc-eyebrow{ font-family:'Space Mono',monospace; font-size:13px; letter-spacing:0.22em; color:#a7adc2; margin-bottom:22px; }
+  .share-card .sc-emblem{ width:148px; height:148px; margin:0 auto 20px; }
+  .share-card .sc-emblem svg{ width:100%; height:100%; display:block; }
+  .share-card .sc-code{ font-family:'Space Mono',monospace; font-weight:700; font-size:52px; margin-bottom:10px; display:flex; justify-content:center; gap:2px; }
+  .share-card .sc-name{ font-family:'Shippori Mincho',serif; font-weight:800; font-size:32px; margin:0 0 8px; }
+  .share-card .sc-tagline{ color:#a7adc2; font-size:15.5px; margin:0 0 30px; }
+  .share-card .sc-divider{ height:1px; background:#343a52; margin:0 0 26px; }
+  .share-card .sc-gauge{ margin-bottom:15px; text-align:left; }
+  .share-card .sc-gauge-labels{ display:flex; justify-content:space-between; font-size:13.5px; color:#a7adc2; margin-bottom:6px; }
+  .share-card .sc-gauge-labels b{ color:#f3efe6; }
+  .share-card .sc-track{ height:9px; background:#262b3d; border-radius:6px; overflow:hidden; }
+  .share-card .sc-fill{ height:100%; border-radius:6px; }
+  .share-card .sc-footer{ margin-top:32px; font-family:'Space Mono',monospace; font-size:12.5px; color:#6b7290; letter-spacing:0.1em; }
 </style>
 </head>
 <body>
@@ -219,6 +264,7 @@
   <section id="screen-result" class="screen">
     <div class="result-top">
       <span class="eyebrow">診断結果</span>
+      <div class="emblem" id="result-emblem"></div>
       <div class="result-code mono" id="result-code"></div>
       <h2 class="result-name" id="result-name"></h2>
       <p class="result-tagline" id="result-tagline"></p>
@@ -262,11 +308,19 @@
       <div class="chip-row" id="careers"></div>
     </div>
 
+    <div class="share-actions">
+      <button class="btn-share" id="btn-share-image">画像でシェアする</button>
+      <button class="btn-copy" id="btn-copy-text">コピー</button>
+    </div>
+    <p class="share-status" id="share-status" aria-live="polite"></p>
+
     <button class="btn-retry" id="btn-retry">もう一度診断する</button>
     <p class="disclaimer">※ 本診断は性格傾向を楽しく知るための簡易テストです。職業選択や人間関係を決定づけるものではありません。</p>
   </section>
 
 </div>
+
+<div class="share-card-wrap"><div class="share-card" id="share-card"></div></div>
 
 <script>
 /* ============== DATA ============== */
@@ -437,6 +491,8 @@ const TYPE_DATA = {
 /* ============== STATE ============== */
 let current = 0;
 const answers = new Array(QUESTIONS.length).fill(null);
+let lastCode = null;
+let lastScores = null;
 
 /* ============== HELPERS ============== */
 function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
@@ -524,11 +580,57 @@ function goBack(){
   }
 }
 
+/* ============== EMBLEM ICON ============== */
+const FAMILY_PATHS = {
+  NT: 'M60,18 L92,60 L60,102 L28,60 Z',
+  NF: 'M60,15 C82,35 88,62 68,85 C64,92 56,92 52,85 C32,62 38,35 60,15 Z',
+  SJ: 'M32,22 H88 V66 C88,86 76,96 60,103 C44,96 32,86 32,66 Z',
+};
+function familyOf(code){
+  const sn = code[1], tf = code[2], jp = code[3];
+  if(sn === 'N') return tf === 'T' ? 'NT' : 'NF';
+  return jp === 'J' ? 'SJ' : 'SP';
+}
+function buildEmblem(code){
+  const filled = code[0] === 'E';
+  const jPole = code[3] === 'J';
+  const fam = familyOf(code);
+  const dotCx = jPole ? 60 : 87, dotCy = jPole ? 60 : 31;
+  const gradId = 'grad-' + code;
+  let shapeSvg;
+  if(fam === 'SP'){
+    shapeSvg = filled
+      ? `<circle cx="60" cy="60" r="34" fill="url(#${gradId})"/><path d="M60,18 A42,42 0 1 1 24,82" fill="none" stroke="url(#${gradId})" stroke-width="3" stroke-linecap="round" opacity="0.55"/>`
+      : `<circle cx="60" cy="60" r="34" fill="none" stroke="url(#${gradId})" stroke-width="5"/><path d="M60,18 A42,42 0 1 1 24,82" fill="none" stroke="url(#${gradId})" stroke-width="3" stroke-linecap="round" opacity="0.5" stroke-dasharray="2 6"/>`;
+  } else {
+    const d = FAMILY_PATHS[fam];
+    shapeSvg = filled
+      ? `<path d="${d}" fill="url(#${gradId})"/>`
+      : `<path d="${d}" fill="none" stroke="url(#${gradId})" stroke-width="5" stroke-linejoin="round"/>`;
+  }
+  return `<svg viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${AXES[0].hex}"/>
+        <stop offset="35%" stop-color="${AXES[1].hex}"/>
+        <stop offset="68%" stop-color="${AXES[2].hex}"/>
+        <stop offset="100%" stop-color="${AXES[3].hex}"/>
+      </linearGradient>
+    </defs>
+    ${shapeSvg}
+    <circle cx="${dotCx}" cy="${dotCy}" r="7.5" fill="${AXES[3].hex}" stroke="#13151d" stroke-width="2.5"/>
+  </svg>`;
+}
+
 /* ============== RESULT RENDER ============== */
 function renderResult(){
   const scores = computeScores();
   const code = AXES.map(a => scores[a.key] >= 0 ? a.left : a.right).join('');
   const data = TYPE_DATA[code];
+  lastCode = code;
+  lastScores = scores;
+
+  document.getElementById('result-emblem').innerHTML = buildEmblem(code);
 
   const codeEl = document.getElementById('result-code');
   codeEl.innerHTML = code.split('').map((ch,i)=>`<span style="color:${AXES[i].hex}">${ch}</span>`).join('');
@@ -586,6 +688,106 @@ function renderResult(){
   });
 }
 
+/* ============== SHARE ============== */
+function buildShareCardHTML(code){
+  const d = TYPE_DATA[code];
+  const scores = lastScores;
+  const gauges = AXES.map(a=>{
+    const raw = scores[a.key];
+    const pctLeft = clamp(Math.round(((raw + 14) / 28) * 100), 0, 100);
+    const dominant = raw >= 0 ? a.left : a.right;
+    const dominantLabel = raw >= 0 ? a.leftLabel : a.rightLabel;
+    const dominantPct = raw >= 0 ? pctLeft : (100 - pctLeft);
+    return `
+      <div class="sc-gauge">
+        <div class="sc-gauge-labels">
+          <span>${a.leftLabel} ${a.left}</span>
+          <b>${dominant} ${dominantLabel} ${dominantPct}%</b>
+          <span>${a.rightLabel} ${a.right}</span>
+        </div>
+        <div class="sc-track"><div class="sc-fill" style="width:${pctLeft}%; background:${a.hex};"></div></div>
+      </div>`;
+  }).join('');
+  const codeHtml = code.split('').map((ch,i)=>`<span style="color:${AXES[i].hex}">${ch}</span>`).join('');
+  return `
+    <div class="sc-eyebrow">羅針盤 ・ 性格診断</div>
+    <div class="sc-emblem">${buildEmblem(code)}</div>
+    <div class="sc-code">${codeHtml}</div>
+    <div class="sc-name">${d.name}</div>
+    <p class="sc-tagline">${d.tagline}</p>
+    <div class="sc-divider"></div>
+    ${gauges}
+    <div class="sc-footer">MY MIND COMPASS</div>`;
+}
+
+function buildShareText(code){
+  const d = TYPE_DATA[code];
+  return `【性格診断】私のタイプは ${code}「${d.name}」でした。\n${d.tagline}\n向いている仕事: ${d.careers.slice(0,3).join('・')}\n\n#羅針盤性格診断`;
+}
+
+function setShareStatus(msg){
+  const el = document.getElementById('share-status');
+  if(el) el.textContent = msg;
+}
+
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    setShareStatus('テキストをコピーしました');
+  }catch(e){
+    window.prompt('下のテキストをコピーしてください', text);
+  }
+}
+
+function fallbackTextShare(){
+  const text = buildShareText(lastCode);
+  if(navigator.share){
+    navigator.share({title:'羅針盤 ・ 性格診断', text})
+      .then(()=> setShareStatus('シェアしました'))
+      .catch(()=> setShareStatus(''));
+  } else {
+    copyText(text);
+  }
+}
+
+async function shareImage(){
+  if(!lastCode) return;
+  const btn = document.getElementById('btn-share-image');
+  btn.disabled = true;
+  setShareStatus('画像を作成しています…');
+  try{
+    const card = document.getElementById('share-card');
+    card.innerHTML = buildShareCardHTML(lastCode);
+    if(document.fonts && document.fonts.ready){ await document.fonts.ready; }
+    if(typeof html2canvas === 'undefined'){ throw new Error('html2canvas unavailable'); }
+    const canvas = await html2canvas(card, {scale:2, backgroundColor:null});
+    canvas.toBlob(async (blob)=>{
+      btn.disabled = false;
+      if(!blob){ fallbackTextShare(); return; }
+      const file = new File([blob], 'my-compass-result.png', {type:'image/png'});
+      const shareText = buildShareText(lastCode);
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        try{
+          await navigator.share({files:[file], title:'羅針盤 ・ 性格診断', text:shareText});
+          setShareStatus('シェアしました');
+          return;
+        }catch(e){
+          if(e && e.name === 'AbortError'){ setShareStatus(''); return; }
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'my-compass-result.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setShareStatus('画像を保存しました。LINEなどでシェアしてね');
+    }, 'image/png');
+  }catch(err){
+    btn.disabled = false;
+    fallbackTextShare();
+  }
+}
+
 /* ============== RESET ============== */
 function resetQuiz(){
   current = 0;
@@ -600,9 +802,14 @@ document.getElementById('btn-start').addEventListener('click', ()=>{
   showScreen('screen-quiz');
 });
 document.getElementById('btn-back').addEventListener('click', goBack);
+document.getElementById('btn-share-image').addEventListener('click', shareImage);
+document.getElementById('btn-copy-text').addEventListener('click', ()=>{
+  if(lastCode) copyText(buildShareText(lastCode));
+});
 document.getElementById('btn-retry').addEventListener('click', ()=>{
   resetQuiz();
   renderQuestion();
+  setShareStatus('');
   showScreen('screen-intro');
 });
 
