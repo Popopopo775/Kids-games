@@ -129,6 +129,7 @@
     .game-card:nth-child(1) { animation-delay: 0.3s; }
     .game-card:nth-child(2) { animation-delay: 0.45s; }
     .game-card:nth-child(3) { animation-delay: 0.6s; }
+    .game-card:nth-child(4) { animation-delay: 0.75s; }
 
     @keyframes cardIn {
       to { opacity: 1; transform: translateY(0); }
@@ -163,6 +164,10 @@
     /* カード3: 炎上回避 */
     .card-3 .card-bg {
       background: linear-gradient(135deg, #AA00FF 0%, #2979FF 100%);
+    }
+    /* カード4: 性格診断 */
+    .card-4 .card-bg {
+      background: linear-gradient(135deg, #00C853 0%, #00BCD4 100%);
     }
 
     .card-inner {
@@ -297,6 +302,18 @@
         <h2 class="card-title">炎上回避</h2>
         <p class="card-desc">ネットの炎上をかわせ！<br>サバイバルチャレンジ！</p>
         <div class="play-btn">あそぶ <span class="arrow">→</span></div>
+      </div>
+    </a>
+
+    <a href="mbti-diagnosis.html" class="game-card card-4">
+      <div class="card-bg"></div>
+      <div class="card-deco deco-1"></div>
+      <div class="card-deco deco-2"></div>
+      <div class="card-inner">
+        <span class="card-emoji">🧠✨</span>
+        <h2 class="card-title">性格診断テスト</h2>
+        <p class="card-desc">あなたはどんな性格？<br>MBTIでじぶんをしろう！</p>
+        <div class="play-btn">やってみる <span class="arrow">→</span></div>
       </div>
     </a>
 
