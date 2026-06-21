@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔮 トリプル占い | ゲームセンター</title>
+<meta name="description" content="星座・干支・数秘術を組み合わせたオリジナル占い">
+<meta name="theme-color" content="#0D0B1E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="starCanvas"></canvas>
+
+<header class="header">
+  <div class="logo">🔮 トリプル占い</div>
+  <div class="header-buttons">
+    <button id="themeToggle">☀️ ライトモード</button>
+    <a class="home-button" href="../index.html">🏠 ゲームセンターへ</a>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="hero">
+    <div class="hero-orb"></div>
+    <p class="hero-eyebrow">✦ 星と干支と数秘術の三重の力 ✦</p>
+    <h1>あなたの運命を<br>今夜、解き明かす</h1>
+    <p class="hero-sub">生年月日を入力するだけで、星座・干支・数秘術の三つの視点から<br>あなただけの詳細な運勢を導き出します</p>
+  </section>
+
+  <section class="card" id="mainCard">
+    <div class="card-label">占い</div>
+    <h2>🔍 あなたを占う</h2>
+    <label for="birthday">生年月日</label>
+    <input type="date" id="birthday">
+    <button class="primary-button" onclick="diagnose()">
+      <span class="btn-star">✦</span> 運命を解き明かす <span class="btn-star">✦</span>
+    </button>
+  </section>
+
+  <div id="result"></div>
+
+  <section class="card compatibility-card">
+    <div class="card-label">相性</div>
+    <h2>💖 相性診断</h2>
+    <label>あなたの誕生日</label>
+    <input type="date" id="you">
+    <label>相手の誕生日</label>
+    <input type="date" id="partner">
+    <button class="primary-button" onclick="compatibility()">
+      <span class="btn-star">✦</span> 二人の縁を見る <span class="btn-star">✦</span>
+    </button>
+    <div id="compatibilityResult"></div>
+  </section>
+
+  <section class="card share-card">
+    <div class="card-label">シェア</div>
+    <h2>📢 結果をシェア</h2>
+    <p>占い結果をSNSでシェアしよう！</p>
+    <button class="share-button" onclick="shareResult()">📤 クリップボードにコピー</button>
+    <div id="shareMessage"></div>
+  </section>
+
+  <section class="card info-card">
+    <div class="card-label">もっと遊ぶ</div>
+    <h2>🎮 ゲームセンターへ</h2>
+    <p>子どもたちが作ったゲームも遊んでみてね！</p>
+    <a class="big-link" href="../index.html">ゲーム一覧へ →</a>
+  </section>
+
+</main>
+
+<footer>
+  <p>✦ © Game Center ✦</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
