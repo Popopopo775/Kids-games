@@ -130,6 +130,7 @@
     .game-card:nth-child(2) { animation-delay: 0.45s; }
     .game-card:nth-child(3) { animation-delay: 0.6s; }
     .game-card:nth-child(4) { animation-delay: 0.75s; }
+    .game-card:nth-child(5) { animation-delay: 0.9s; }
 
     @keyframes cardIn {
       to { opacity: 1; transform: translateY(0); }
@@ -168,6 +169,10 @@
     /* カード4: 性格診断 */
     .card-4 .card-bg {
       background: linear-gradient(135deg, #00C853 0%, #00BCD4 100%);
+    }
+    /* カード5: 占い */
+    .card-5 .card-bg {
+      background: linear-gradient(135deg, #FF4081 0%, #AA00FF 100%);
     }
 
     .card-inner {
@@ -252,7 +257,6 @@
 </head>
 <body>
 
-  <!-- 星の背景 -->
   <div class="stars" id="stars"></div>
 
   <header>
@@ -314,6 +318,18 @@
         <h2 class="card-title">性格診断テスト</h2>
         <p class="card-desc">あなたはどんな性格？<br>MBTIでじぶんをしろう！</p>
         <div class="play-btn">やってみる <span class="arrow">→</span></div>
+      </div>
+    </a>
+
+    <a href="fortune/index.html" class="game-card card-5">
+      <div class="card-bg"></div>
+      <div class="card-deco deco-1"></div>
+      <div class="card-deco deco-2"></div>
+      <div class="card-inner">
+        <span class="card-emoji">🔮✨</span>
+        <h2 class="card-title">まほうの占い</h2>
+        <p class="card-desc">きょうの運勢は？<br>ドキドキの占いで未来をのぞこう！</p>
+        <div class="play-btn">うらなう <span class="arrow">→</span></div>
       </div>
     </a>
 
