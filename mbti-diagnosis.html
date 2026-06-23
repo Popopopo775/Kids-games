@@ -193,6 +193,68 @@
   .share-card .sc-track{ height:9px; background:#262b3d; border-radius:6px; overflow:hidden; }
   .share-card .sc-fill{ height:100%; border-radius:6px; }
   .share-card .sc-footer{ margin-top:32px; font-family:'Space Mono',monospace; font-size:12.5px; color:#6b7290; letter-spacing:0.1em; }
+
+  .bad-note{ font-size:12px; color:var(--text-faint); margin:12px 0 0; line-height:1.7; }
+
+  .btn-map{
+    width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text);
+    font-size:14px; padding:15px; border-radius:999px; cursor:pointer; margin-bottom:18px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .btn-map:hover{ border-color:var(--accent-sn); }
+
+  .nav-link{
+    display:inline-block; margin-top:28px; font-size:13px; color:var(--text-dim);
+    text-decoration:none; border-bottom:1px dashed var(--line); padding-bottom:2px;
+    background:none; border-top:none; border-left:none; border-right:none; cursor:pointer; font-family:inherit;
+  }
+  .nav-link:hover{ color:var(--text); border-color:var(--text-dim); }
+
+  /* ---------- MAP SCREEN ---------- */
+  .map-top{ padding-top:32px; }
+  .map-top h1{ font-size:24px; font-weight:800; margin:14px 0 8px; }
+  .map-lead{ color:var(--text-dim); font-size:13.5px; margin:0 0 24px; line-height:1.8; }
+  .map-legend{ display:flex; gap:14px; font-size:11.5px; color:var(--text-faint); margin-bottom:18px; font-family:'Space Mono',monospace; }
+
+  .map-canvas{
+    position:relative; width:100%; aspect-ratio:8/9; background:var(--surface);
+    border:1px solid var(--line); border-radius:18px; overflow:hidden; margin-bottom:8px;
+  }
+  .map-quad{ position:absolute; width:50%; height:50%; }
+  .map-quad-label{ position:absolute; font-family:'Space Mono',monospace; font-size:10px; color:var(--text-faint); opacity:0.7; }
+  .map-axis-line{ position:absolute; background:var(--line); }
+  .map-axis-v{ left:50%; top:0; width:1px; height:100%; }
+  .map-axis-h{ left:0; top:50%; width:100%; height:1px; }
+  .map-axis-label{
+    position:absolute; font-family:'Space Mono',monospace; font-size:10.5px; color:var(--text-dim);
+    background:var(--surface); padding:1px 6px; white-space:nowrap;
+  }
+  .map-point{
+    position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center;
+    background:none; border:none; cursor:pointer; padding:4px; width:54px;
+  }
+  .map-point .map-emblem{ width:26px; height:26px; }
+  .map-point .map-emblem svg{ width:100%; height:100%; display:block; }
+  .map-point .map-code{ font-family:'Space Mono',monospace; font-size:8.5px; font-weight:700; color:var(--text-dim); margin-top:3px; }
+  .map-point .map-nick{ font-size:8.5px; color:var(--text-faint); line-height:1.2; text-align:center; }
+  .map-point.active .map-emblem{ filter:drop-shadow(0 0 0 2px var(--text)); }
+  .map-point.active{ z-index:5; }
+  .map-point.active .map-code{ color:var(--text); }
+  .map-point.is-you .map-emblem{ box-shadow:0 0 0 3px var(--accent-jp), 0 0 14px 2px rgba(242,181,68,0.6); border-radius:50%; }
+  .map-point.is-you .map-nick{ color:var(--accent-jp); }
+
+  .map-detail{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 18px;
+    margin:16px 0 24px; min-height:64px;
+  }
+  .map-detail .md-empty{ color:var(--text-faint); font-size:13px; text-align:center; padding:10px 0; }
+  .map-detail .md-head{ display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+  .map-detail .md-emblem{ width:38px; height:38px; flex-shrink:0; }
+  .map-detail .md-emblem svg{ width:100%; height:100%; display:block; }
+  .map-detail .md-code{ font-family:'Space Mono',monospace; font-weight:700; font-size:13px; color:var(--text-dim); }
+  .map-detail .md-name{ font-family:'Shippori Mincho',serif; font-size:18px; font-weight:700; margin:0; }
+  .map-detail .md-tagline{ font-size:12.5px; color:var(--text-dim); margin:0 0 6px; }
+  .map-detail .md-desc{ font-size:13px; margin:0; }
 </style>
 </head>
 <body>
@@ -240,6 +302,7 @@
       </div>
 
       <p class="disclaimer">※ 心理学のMBTI理論をもとにした簡易的な自己診断ツールです。学術的・医学的な検査結果ではなく、エンターテインメント目的でお楽しみください。</p>
+      <button class="nav-link" id="btn-go-map-intro">🧭 診断せずに16タイプ全体マップを見る</button>
     </div>
   </section>
 
@@ -304,9 +367,17 @@
     </div>
 
     <div class="card">
+      <h2>相性が分かれやすいタイプ</h2>
+      <div id="bad-matches"></div>
+      <p class="bad-note">※ 違いが大きい組み合わせほど、お互いを知る努力で良い関係に育つこともあります。</p>
+    </div>
+
+    <div class="card">
       <h2>向いている仕事</h2>
       <div class="chip-row" id="careers"></div>
     </div>
+
+    <button class="btn-map" id="btn-go-map-result">🧭 16タイプマップで自分の位置を見る</button>
 
     <div class="share-actions">
       <button class="btn-share" id="btn-share-image">画像でシェアする</button>
@@ -316,6 +387,19 @@
 
     <button class="btn-retry" id="btn-retry">もう一度診断する</button>
     <p class="disclaimer">※ 本診断は性格傾向を楽しく知るための簡易テストです。職業選択や人間関係を決定づけるものではありません。</p>
+  </section>
+
+  <!-- ================= MAP ================= -->
+  <section id="screen-map" class="screen">
+    <div class="map-top">
+      <button class="nav-link" id="btn-map-back" style="margin-top:0;">← もどる</button>
+      <h1 class="serif">16タイプの全体マップ</h1>
+      <p class="map-lead">縦軸は思考(T)⇄感情(F)、横軸は直観(N)⇄感覚(S)。同じマス内の2タイプは、外向/内向・判断/知覚の違いを表しています。アイコンをタップすると詳細が見られます。</p>
+      <div class="map-canvas" id="map-canvas"></div>
+      <div class="map-detail" id="map-detail">
+        <p class="md-empty">↑ タイプのアイコンをタップしてみよう</p>
+      </div>
+    </div>
   </section>
 
 </div>
@@ -380,6 +464,7 @@ const TYPE_DATA = {
     weaknesses:['感情表現が苦手','完璧主義になりやすい','正しさを優先しがち'],
     best:[{code:'ENFP',reason:'自由な発想と情熱が、論理一辺倒の思考に新しい視点を与えてくれる'},{code:'ENTP',reason:'知的な議論を楽しみ合える刺激的なパートナー'}],
     good:[{code:'INFJ',reason:'深い洞察力を共有できる落ち着いた関係'},{code:'INTJ',reason:'価値観が近く、互いの計画を尊重し合える'}],
+    bad:[{code:'ESFP',reason:'即興で動くESFPのペースに、計画を重視するINTJは戸惑いやすい。柔軟性を学び合えると関係が深まる'}],
     careers:['経営戦略コンサルタント','システムアーキテクト','研究者','投資アナリスト','弁理士','プロダクトマネージャー']},
   INTP:{ name:'探究者', tagline:'理論を組み立てることに没頭する思索家',
     desc:'物事の仕組みや論理構造を理解することに強い知的好奇心を持つ。柔軟な発想で複雑な問題に新しい角度から切り込み、矛盾を見つけると徹底的に検証したくなる。一人で考える時間を大切にする。',
@@ -387,6 +472,7 @@ const TYPE_DATA = {
     weaknesses:['行動に移すのが遅れがち','感情表現が控えめ','細かい実務作業が苦手'],
     best:[{code:'ENTJ',reason:'行動力と決断力が、考えすぎて止まりがちな部分を後押ししてくれる'},{code:'ENFJ',reason:'人当たりの良さが、内に閉じこもりがちな思考を外へ開いてくれる'}],
     good:[{code:'INTP',reason:'同じペースで知的な対話を楽しめる'},{code:'ESTJ',reason:'実行力のある相手が理論を形にする手助けをしてくれる'}],
+    bad:[{code:'ESFJ',reason:'感情よりロジックを優先するINTPに、人間関係を大切にするESFJはすれ違いを感じやすい'}],
     careers:['ソフトウェアエンジニア','データサイエンティスト','大学研究者','数学・哲学系の専門職','システム設計者','発明家・起業家']},
   ENTJ:{ name:'統率者', tagline:'目標に向かって組織を動かすリーダー',
     desc:'明確なビジョンを掲げ、人や資源を効率よく動かしながら目標を達成していくタイプ。決断力があり、課題を見つけると解決策を実行に移すスピードが速い。リーダーシップを発揮する場面で力を発揮する。',
@@ -394,6 +480,7 @@ const TYPE_DATA = {
     weaknesses:['感情への配慮が後回しになりがち','せっかちになりやすい','他人に厳しくなりすぎることがある'],
     best:[{code:'INFP',reason:'柔らかな感受性が、強引になりがちな自分をやわらげてくれる'},{code:'INTP',reason:'論理的な議論をじっくり深め合える相棒'}],
     good:[{code:'ENTJ',reason:'同じ熱量で目標に向かえる頼もしい関係'},{code:'ENFP',reason:'発想の自由さが新しい戦略のヒントになる'}],
+    bad:[{code:'ISFP',reason:'効率と成果を求めるENTJのペースに、自分のペースを大事にするISFPは息苦しさを感じやすい'}],
     careers:['経営者・起業家','事業責任者','弁護士','経営コンサルタント','プロジェクトマネージャー','行政・政治の管理職']},
   ENTP:{ name:'発明家', tagline:'議論と発想を楽しむアイデアマン',
     desc:'新しい可能性を見つけることに喜びを感じ、既存のルールに疑問を投げかけながら独自のアイデアを生み出す。会話の中で考えを発展させるのが得意で、議論そのものを楽しむ傾向がある。',
@@ -401,6 +488,7 @@ const TYPE_DATA = {
     weaknesses:['飽きっぽく長続きしにくい','細部の詰めが甘くなりがち','議論で相手を追い詰めがち'],
     best:[{code:'INFJ',reason:'深い洞察力が、思いつきのアイデアに意味づけをしてくれる'},{code:'INTJ',reason:'戦略性が、発想を実現可能な計画に変えてくれる'}],
     good:[{code:'ENTP',reason:'発想合戦を楽しみ合える刺激的な関係'},{code:'INFP',reason:'価値観の深さが対話に厚みを与えてくれる'}],
+    bad:[{code:'ISFJ',reason:'変化や議論を楽しむENTPに、安定を好むISFJは振り回されていると感じやすい'}],
     careers:['スタートアップ起業家','企画・マーケター','ジャーナリスト','弁護士','クリエイティブディレクター','コンサルタント']},
   INFJ:{ name:'洞察者', tagline:'静かに人と社会を見つめる理想家',
     desc:'人の心の機微を読み取る直観力に優れ、物事の奥にある意味や意図を理解しようとする。理想や信念を大切にし、それを実現するために静かに、しかし粘り強く行動する。',
@@ -408,6 +496,7 @@ const TYPE_DATA = {
     weaknesses:['一人で抱え込みやすい','理想と現実のギャップに悩みやすい','自己犠牲的になりがち'],
     best:[{code:'ENTP',reason:'刺激的な発想が、内に秘めた理想を言葉にする手助けをしてくれる'},{code:'ENFP',reason:'温かい情熱が、深く考えすぎる心を軽くしてくれる'}],
     good:[{code:'INFJ',reason:'価値観を深く共有できる静かな絆'},{code:'INTJ',reason:'本質を見抜く力を互いに尊重し合える'}],
+    bad:[{code:'ESTP',reason:'深く考えてから動くINFJに、勢いで行動するESTPは物足りなさを感じやすい'}],
     careers:['カウンセラー・心理職','作家・編集者','教育者','NPO・福祉関連職','人事・採用担当','クリエイティブ職']},
   INFP:{ name:'夢想家', tagline:'内なる価値観を大切にする理想主義者',
     desc:'自分の中にある信念や美意識を大切にし、それに沿って生きようとする。表面的なことよりも本質的な意味を求め、人の痛みに敏感に反応する優しさを持つ。',
@@ -415,6 +504,7 @@ const TYPE_DATA = {
     weaknesses:['現実的な判断が苦手なことがある','批判に傷つきやすい','行動に移すまで時間がかかる'],
     best:[{code:'ENTJ',reason:'明確な方向性が、夢を現実の形にする力を貸してくれる'},{code:'ENFJ',reason:'温かいサポートが、自分らしさを安心して発揮させてくれる'}],
     good:[{code:'INFP',reason:'同じ感性で深く分かり合える関係'},{code:'ISFJ',reason:'穏やかな思いやりが心地よい安心感を与えてくれる'}],
+    bad:[{code:'ESTJ',reason:'効率とルールを重んじるESTJに、自分の価値観を大切にするINFPは窮屈さを感じやすい'}],
     careers:['作家・脚本家','イラストレーター・デザイナー','カウンセラー','NPO職員','編集者','翻訳家']},
   ENFJ:{ name:'鼓舞者', tagline:'人の可能性を引き出すまとめ役',
     desc:'人の成長や幸福を心から願い、それぞれの強みを見つけて引き出すことに喜びを感じる。場の空気を読み、人と人をつなぐ調整役として自然に立ち回る。',
@@ -422,6 +512,7 @@ const TYPE_DATA = {
     weaknesses:['自分のことを後回しにしがち','人からの評価を気にしすぎる','対立を避けようとしすぎる'],
     best:[{code:'INFP',reason:'静かな深さが、人を支えがちな自分を支え返してくれる'},{code:'ISFP',reason:'素直な感性が、安心できる関係を築いてくれる'}],
     good:[{code:'ENFJ',reason:'同じ熱量で人を支え合える関係'},{code:'INTP',reason:'論理的な視点が新しい気づきを与えてくれる'}],
+    bad:[{code:'ISTP',reason:'感情を共有したいENFJに、距離を保ちたいISTPはプレッシャーを感じやすい'}],
     careers:['教師・講師','人事・組織開発','カウンセラー','NPO・社会活動家','広報・PR','コーチ・キャリアアドバイザー']},
   ENFP:{ name:'旅人', tagline:'好奇心のままに世界を広げる自由人',
     desc:'新しい人やアイデアとの出会いに胸を躍らせ、可能性を追いかけることにエネルギーを感じる。感受性が豊かで、人との対話の中からインスピレーションを得るタイプ。',
@@ -429,6 +520,7 @@ const TYPE_DATA = {
     weaknesses:['計画や細部の管理が苦手','興味が移ろいやすい','ストレスを溜め込みやすい'],
     best:[{code:'INTJ',reason:'冷静な戦略性が、広がりすぎるアイデアを形にしてくれる'},{code:'INFJ',reason:'静かな深さが、安心して心を開ける関係をつくる'}],
     good:[{code:'ENFP',reason:'同じ熱量で新しい世界を一緒に楽しめる'},{code:'ENTP',reason:'発想の自由さが刺激的な化学反応を生む'}],
+    bad:[{code:'ISTJ',reason:'自由に動きたいENFPに、計画を守りたいISTJは振り回されていると感じやすい'}],
     careers:['企画・マーケター','ジャーナリスト','イベントプランナー','クリエイティブ職','営業','起業家']},
   ISTJ:{ name:'守護者', tagline:'約束と責任を守り続ける実務家',
     desc:'誠実で責任感が強く、決めたことをコツコツと最後までやり遂げる。事実やルールを重んじ、安定した環境で着実に成果を積み上げていくことを得意とする。',
@@ -436,6 +528,7 @@ const TYPE_DATA = {
     weaknesses:['変化への対応が苦手','柔軟性に欠けることがある','感情表現が控えめ'],
     best:[{code:'ESFP',reason:'明るい行動力が、几帳面な日常に楽しさを加えてくれる'},{code:'ESTP',reason:'臨機応変な対応力が、お互いの弱点を補い合える'}],
     good:[{code:'ISTJ',reason:'同じ価値観で安定した関係を築ける'},{code:'ISFJ',reason:'誠実さと思いやりが心地よい安心感を生む'}],
+    bad:[{code:'ENFP',reason:'ルールや計画を重んじるISTJの慎重さに、自由に動きたいENFPは窮屈さを感じることがある'}],
     careers:['会計士・経理','公務員','品質管理','法務・コンプライアンス','銀行員','システム運用管理者']},
   ISFJ:{ name:'献身者', tagline:'周囲を静かに支える思いやりの人',
     desc:'人の役に立つことに喜びを感じ、細やかな気配りで周囲を支える。伝統や安定を大切にし、信頼関係を築いた相手には献身的に尽くす傾向がある。',
@@ -443,6 +536,7 @@ const TYPE_DATA = {
     weaknesses:['自己主張が苦手','変化やプレッシャーに弱い','頼まれごとを断れない'],
     best:[{code:'ESFP',reason:'明るさと行動力が、控えめな自分を外へ引き出してくれる'},{code:'ESTP',reason:'前向きなエネルギーが日常に活気を与えてくれる'}],
     good:[{code:'ISFJ',reason:'同じ思いやりで穏やかな関係を築ける'},{code:'ISTJ',reason:'誠実さを土台にした信頼関係を築ける'}],
+    bad:[{code:'ENTP',reason:'安定や伝統を重んじるISFJの慎重さに、変化を楽しみたいENTPは退屈さを感じることがある'}],
     careers:['看護師・医療職','教育・保育','人事・総務','福祉・介護職','図書館司書','カスタマーサポート']},
   ESTJ:{ name:'統括者', tagline:'秩序を整え組織を動かす実行家',
     desc:'物事を効率よく進めることに長け、ルールや手順を整えながら周囲をまとめ上げる。責任感が強く、決めたことは最後までやり通す実行力を持つ。',
@@ -450,6 +544,7 @@ const TYPE_DATA = {
     weaknesses:['柔軟性に欠けることがある','ルールを優先しがち','頑固になりやすい'],
     best:[{code:'ISFP',reason:'柔らかな感性が、几帳面になりすぎる日常に潤いを与えてくれる'},{code:'ISTP',reason:'実務的な器用さが、効率重視の価値観と噛み合う'}],
     good:[{code:'ESTJ',reason:'同じ価値観で物事を着実に進められる'},{code:'ESFJ',reason:'温かさが組織運営に良いバランスをもたらす'}],
+    bad:[{code:'INFP',reason:'曖昧さを残しがちなINFPに、効率を重んじるESTJはもどかしさを感じることがある'}],
     careers:['経営管理職','公務員・行政職','プロジェクトマネージャー','営業マネージャー','製造・生産管理','士業全般']},
   ESFJ:{ name:'世話人', tagline:'人と人をつなぐ温かいまとめ役',
     desc:'周囲の調和を大切にし、人の役に立つことに喜びを感じる社交的なタイプ。気配りが細やかで、場の雰囲気を読みながら円滑な人間関係を築くことを得意とする。',
@@ -457,6 +552,7 @@ const TYPE_DATA = {
     weaknesses:['人の評価を気にしすぎる','対立を避けようとしすぎる','自分の本音を抑えがち'],
     best:[{code:'ISFP',reason:'静かな個性が、世話好きな自分に新しい視点を与えてくれる'},{code:'ISTP',reason:'落ち着いた合理性が良いバランスを生む'}],
     good:[{code:'ESFJ',reason:'同じ価値観で温かい関係を築ける'},{code:'ESTJ',reason:'実務的な信頼関係を築きやすい'}],
+    bad:[{code:'INTP',reason:'場の空気より理屈を優先するINTPの態度に、人間関係を大切にするESFJは寂しさを感じることがある'}],
     careers:['人事・総務','教育・保育','営業・接客業','イベント運営','医療事務','広報・PR']},
   ISTP:{ name:'職人', tagline:'手と頭で問題を解決する実践派',
     desc:'物事の仕組みを理解し、実際に手を動かしながら最適な解決策を見つけることを得意とする。冷静で合理的、必要な時には大胆に行動する柔軟さも持ち合わせる。',
@@ -464,6 +560,7 @@ const TYPE_DATA = {
     weaknesses:['感情表現が苦手','長期的な計画が苦手なことがある','単調な作業に飽きやすい'],
     best:[{code:'ESFJ',reason:'温かい社交性が、寡黙になりがちな自分を支えてくれる'},{code:'ESTJ',reason:'計画性のある実行力が良いコンビになる'}],
     good:[{code:'ISTP',reason:'同じペースで自由を尊重し合える'},{code:'ISFP',reason:'感性の豊かさが新しい刺激を与えてくれる'}],
+    bad:[{code:'ENFJ',reason:'一人の時間を大切にしたいISTPに、寄り添おうとするENFJは物足りなさを感じることがある'}],
     careers:['エンジニア・技術職','整備士・職人','パイロット','救急・消防関連職','データアナリスト','スポーツ関連職']},
   ISFP:{ name:'芸術家', tagline:'静かに自分らしさを表現する感性派',
     desc:'美しいものや心地よいものに敏感で、自分なりの感性を大切にしながら生きる。控えめながらも芯が強く、信じる価値観に対しては柔軟に、しかし誠実に向き合う。',
@@ -471,6 +568,7 @@ const TYPE_DATA = {
     weaknesses:['自己主張が苦手','計画性に欠けることがある','ストレスを内に溜め込みやすい'],
     best:[{code:'ESTJ',reason:'頼れる実行力が、控えめな自分を安心して支えてくれる'},{code:'ENFJ',reason:'温かい励ましが、自分らしさを表現する後押しになる'}],
     good:[{code:'ISFP',reason:'同じ感性でお互いを尊重し合える'},{code:'ESFP',reason:'明るいエネルギーが心地よい刺激を与えてくれる'}],
+    bad:[{code:'ENTJ',reason:'マイペースに進めたいISFPに、効率と成果を求めるENTJは物足りなさやもどかしさを感じることがある'}],
     careers:['デザイナー・アーティスト','音楽・写真関連職','美容・ファッション関連職','料理人','セラピスト','動物関連職']},
   ESTP:{ name:'挑戦者', tagline:'今この瞬間を全力で生きる行動派',
     desc:'状況を素早く判断し、考えるより先に動くフットワークの軽さが持ち味。リスクを恐れず、目の前の課題に対して実践的な解決策を見つけることを得意とする。',
@@ -478,6 +576,7 @@ const TYPE_DATA = {
     weaknesses:['計画性に欠けることがある','衝動的になりやすい','長期的な視点が苦手'],
     best:[{code:'ISFJ',reason:'落ち着いた思いやりが、勢いのある行動に安心感を加えてくれる'},{code:'ISTJ',reason:'堅実さが冒険心とうまくバランスを取れる'}],
     good:[{code:'ESTP',reason:'同じ熱量で刺激的な日々を楽しめる'},{code:'ESFP',reason:'明るさを分かち合える楽しい関係'}],
+    bad:[{code:'INFJ',reason:'即断即決のESTPのペースに、じっくり考えたいINFJはついていけないと感じることがある'}],
     careers:['営業職','起業家','スポーツ関連職','救急・消防関連職','イベントプロデューサー','不動産業']},
   ESFP:{ name:'演者', tagline:'場を明るく彩るエンターテイナー',
     desc:'人を楽しませることが好きで、その場の雰囲気を明るくする天性のセンスを持つ。今この瞬間を楽しむことを大切にし、周囲を巻き込みながら行動するエネルギーがある。',
@@ -485,6 +584,7 @@ const TYPE_DATA = {
     weaknesses:['計画性に欠けることがある','批判に敏感になりやすい','勢いで行動しがち'],
     best:[{code:'ISTJ',reason:'堅実な安定感が、自由奔放な自分をしっかり支えてくれる'},{code:'ISFJ',reason:'穏やかな思いやりが心地よい関係を築く'}],
     good:[{code:'ESFP',reason:'同じ明るさで一緒に楽しめる関係'},{code:'ESTP',reason:'行動力を共有できる刺激的なコンビ'}],
+    bad:[{code:'INTJ',reason:'慎重に計画を立てたがるINTJのペースに、その場を楽しみたいESFPはもどかしさを感じやすい'}],
     careers:['タレント・俳優','イベント・接客業','営業職','デザイン関連職','旅行・観光業','スポーツインストラクター']},
 };
 
@@ -675,6 +775,7 @@ function renderResult(){
   }
   document.getElementById('best-matches').innerHTML = data.best.map(matchCard).join('');
   document.getElementById('good-matches').innerHTML = data.good.map(matchCard).join('');
+  document.getElementById('bad-matches').innerHTML = data.bad.map(matchCard).join('');
 
   document.getElementById('careers').innerHTML = data.careers.map(c=>`<span class="chip">${c}</span>`).join('');
 
@@ -788,6 +889,78 @@ async function shareImage(){
   }
 }
 
+/* ============== TYPE MAP ============== */
+const MAP_COORDS = {
+  INTJ:{x:22,y:25}, ENTJ:{x:35,y:25}, ISTJ:{x:65,y:25}, ESTJ:{x:78,y:25},
+  INTP:{x:22,y:36}, ENTP:{x:35,y:36}, ISTP:{x:65,y:36}, ESTP:{x:78,y:36},
+  INFJ:{x:22,y:64}, ENFJ:{x:35,y:64}, ISFJ:{x:65,y:64}, ESFJ:{x:78,y:64},
+  INFP:{x:22,y:75}, ENFP:{x:35,y:75}, ISFP:{x:65,y:75}, ESFP:{x:78,y:75},
+};
+let mapReturnScreen = 'screen-intro';
+let mapBuilt = false;
+
+function buildMap(){
+  const canvas = document.getElementById('map-canvas');
+  let html = `
+    <div class="map-quad" style="left:0;top:0;background:${AXES[2].hex}10;"><span class="map-quad-label" style="left:6px;top:6px;">NT</span></div>
+    <div class="map-quad" style="left:50%;top:0;background:${AXES[0].hex}10;"><span class="map-quad-label" style="right:6px;top:6px;left:auto;">ST</span></div>
+    <div class="map-quad" style="left:0;top:50%;background:${AXES[3].hex}10;"><span class="map-quad-label" style="left:6px;bottom:6px;top:auto;">NF</span></div>
+    <div class="map-quad" style="left:50%;top:50%;background:${AXES[1].hex}10;"><span class="map-quad-label" style="right:6px;bottom:6px;top:auto;left:auto;">SF</span></div>
+    <div class="map-axis-line map-axis-v"></div>
+    <div class="map-axis-line map-axis-h"></div>
+    <div class="map-axis-label" style="left:50%;top:2px;transform:translateX(-50%);">思考 T</div>
+    <div class="map-axis-label" style="left:50%;bottom:2px;transform:translateX(-50%);">感情 F</div>
+    <div class="map-axis-label" style="left:2px;top:50%;transform:translateY(-50%);">直観 N</div>
+    <div class="map-axis-label" style="right:2px;top:50%;transform:translateY(-50%);">感覚 S</div>
+  `;
+  for(const code in MAP_COORDS){
+    const pos = MAP_COORDS[code];
+    const d = TYPE_DATA[code];
+    html += `
+      <button class="map-point" data-code="${code}" style="left:${pos.x}%; top:${pos.y}%;" aria-label="${code} ${d.name}">
+        <span class="map-emblem">${buildEmblem(code)}</span>
+        <span class="map-code">${code}</span>
+        <span class="map-nick">${d.name}</span>
+      </button>`;
+  }
+  canvas.innerHTML = html;
+  canvas.querySelectorAll('.map-point').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectMapPoint(btn.dataset.code));
+  });
+  mapBuilt = true;
+}
+
+function selectMapPoint(code){
+  document.querySelectorAll('.map-point').forEach(p=>{
+    p.classList.toggle('active', p.dataset.code === code);
+  });
+  const d = TYPE_DATA[code];
+  document.getElementById('map-detail').innerHTML = `
+    <div class="md-head">
+      <span class="md-emblem">${buildEmblem(code)}</span>
+      <div>
+        <span class="md-code">${code}</span>
+        <p class="md-name">${d.name}</p>
+      </div>
+    </div>
+    <p class="md-tagline">${d.tagline}</p>
+    <p class="md-desc">${d.desc}</p>`;
+}
+
+function openMap(fromScreen){
+  mapReturnScreen = fromScreen;
+  if(!mapBuilt) buildMap();
+  document.querySelectorAll('.map-point').forEach(p=> p.classList.remove('is-you'));
+  if(lastCode){
+    const youPoint = document.querySelector(`.map-point[data-code="${lastCode}"]`);
+    if(youPoint) youPoint.classList.add('is-you');
+    selectMapPoint(lastCode);
+  } else {
+    document.getElementById('map-detail').innerHTML = '<p class="md-empty">↑ タイプのアイコンをタップしてみよう</p>';
+  }
+  showScreen('screen-map');
+}
+
 /* ============== RESET ============== */
 function resetQuiz(){
   current = 0;
@@ -801,6 +974,9 @@ renderQuestion();
 document.getElementById('btn-start').addEventListener('click', ()=>{
   showScreen('screen-quiz');
 });
+document.getElementById('btn-go-map-intro').addEventListener('click', ()=> openMap('screen-intro'));
+document.getElementById('btn-go-map-result').addEventListener('click', ()=> openMap('screen-result'));
+document.getElementById('btn-map-back').addEventListener('click', ()=> showScreen(mapReturnScreen));
 document.getElementById('btn-back').addEventListener('click', goBack);
 document.getElementById('btn-share-image').addEventListener('click', shareImage);
 document.getElementById('btn-copy-text').addEventListener('click', ()=>{
