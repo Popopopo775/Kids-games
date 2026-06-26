@@ -131,6 +131,7 @@
     .game-card:nth-child(3) { animation-delay: 0.6s; }
     .game-card:nth-child(4) { animation-delay: 0.75s; }
     .game-card:nth-child(5) { animation-delay: 0.9s; }
+    .game-card:nth-child(6) { animation-delay: 1.05s; }
 
     @keyframes cardIn {
       to { opacity: 1; transform: translateY(0); }
@@ -166,12 +167,16 @@
     .card-3 .card-bg {
       background: linear-gradient(135deg, #AA00FF 0%, #2979FF 100%);
     }
-    /* カード4: 性格診断 */
+    /* カード4: CASCADE */
     .card-4 .card-bg {
+      background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%);
+    }
+    /* カード5: 性格診断 */
+    .card-5 .card-bg {
       background: linear-gradient(135deg, #00C853 0%, #00BCD4 100%);
     }
-    /* カード5: 占い */
-    .card-5 .card-bg {
+    /* カード6: 占い */
+    .card-6 .card-bg {
       background: linear-gradient(135deg, #FF4081 0%, #AA00FF 100%);
     }
 
@@ -309,7 +314,19 @@
       </div>
     </a>
 
-    <a href="mbti-diagnosis.html" class="game-card card-4">
+    <a href="CASCADE.html" class="game-card card-4">
+      <div class="card-bg"></div>
+      <div class="card-deco deco-1"></div>
+      <div class="card-deco deco-2"></div>
+      <div class="card-inner">
+        <span class="card-emoji">🟦🎲</span>
+        <h2 class="card-title">CASCADE</h2>
+        <p class="card-desc">ブロックをおとしてそろえろ！<br>定番落ちものパズルに挑戦！</p>
+        <div class="play-btn">あそぶ <span class="arrow">→</span></div>
+      </div>
+    </a>
+
+    <a href="mbti-diagnosis.html" class="game-card card-5">
       <div class="card-bg"></div>
       <div class="card-deco deco-1"></div>
       <div class="card-deco deco-2"></div>
@@ -321,7 +338,7 @@
       </div>
     </a>
 
-    <a href="fortune/index.html" class="game-card card-5">
+    <a href="fortune/index.html" class="game-card card-6">
       <div class="card-bg"></div>
       <div class="card-deco deco-1"></div>
       <div class="card-deco deco-2"></div>
